@@ -124,8 +124,8 @@
   <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
   <div class="cart-sidebar" id="cartSidebar">
     <div class="cart-header">
-      <h3>Your Cart</h3>
-      <button onclick="toggleCart()" class="close-btn">✕</button>
+      <h2>Your Cart</h2>
+      <button onclick="toggleCart()" class="close-cart">✕</button>
     </div>
     <div class="cart-items" id="cartItems">
       <p class="empty-cart">Your cart is empty</p>
@@ -139,7 +139,7 @@
   </div>
 
   <!-- CHECKOUT MODAL -->
-  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="overlay" id="modalOverlay" onclick="closeModal(event)">
     <div class="modal">
       <div class="modal-header">
         <h3>Complete Your Order</h3>
@@ -173,7 +173,7 @@
   </div>
 
   <!-- THANK YOU MODAL -->
-  <div class="modal-overlay" id="thankYouOverlay">
+  <div class="overlay" id="thankYouOverlay">
     <div class="modal thankyou-modal">
       <div class="thankyou-header">
         <div class="thankyou-icon">✅</div>
@@ -194,7 +194,7 @@
   </div>
 
   <!-- AUTH MODAL (Login / Register) -->
-  <div class="modal-overlay" id="authOverlay" onclick="closeAuthModal(event)">
+  <div class="overlay" id="authOverlay" onclick="closeAuthModal(event)">
     <div class="modal auth-modal">
       <div class="auth-tabs">
         <button class="auth-tab active" id="loginTab" onclick="switchTab('login')">Login</button>
@@ -270,7 +270,7 @@
   </div>
 
   <!-- WISHLIST MODAL -->
-  <div class="modal-overlay" id="wishlistOverlay" onclick="closeWishlistModal(event)">
+  <div class="side-modal-overlay" id="wishlistOverlay" onclick="closeWishlistModal(event)">
     <div class="modal side-modal">
       <div class="modal-header">
         <h3>❤️ My Wishlist</h3>
@@ -283,7 +283,7 @@
   </div>
 
   <!-- ORDER HISTORY MODAL -->
-  <div class="modal-overlay" id="ordersOverlay" onclick="closeOrdersModal(event)">
+  <div class="side-modal-overlay" id="ordersOverlay" onclick="closeOrdersModal(event)">
     <div class="modal side-modal">
       <div class="modal-header">
         <h3>📦 Order History</h3>
