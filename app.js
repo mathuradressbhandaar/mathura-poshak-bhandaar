@@ -9,7 +9,7 @@ const ORDERS_API_URL = "https://script.google.com/macros/s/AKfycbwwzRrKZMCmAm2cT
 // Paste your published Google Sheet CSV URL here
 // File > Share > Publish to web > CSV > Copy link
 // =============================================
-const SHEET_CSV_URL = ""; // paste your CSV URL here
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTUoprJDH_LmaXwL1RFDTdlBXxg2tqbHm9SvMTOQtIz9Y6MuAy9zXch3DQzA09QQ0pT2NRyjsoK3isf/pub?gid=0&single=true&output=csv"; // paste your CSV URL here
 
 
 let cart = {};
