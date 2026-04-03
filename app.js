@@ -539,3 +539,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+// Compatibility shim for older cached HTML versions
+window.toggleAuthDropdown = function() { openAuth('login'); };
