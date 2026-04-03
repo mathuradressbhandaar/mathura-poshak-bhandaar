@@ -45,8 +45,8 @@ function loadSession() {
 
 function updateAuthBtn() {
   const btn = document.getElementById("authBtn");
-  const txt = document.getElementById("authBtnLabel");
-  const ddName = document.getElementById("dropdownName");
+  const txt = document.getElementById("authBtnText");
+  const ddName = document.getElementById("userDropdownName");
   const dd = document.getElementById("userDropdown");
   if (currentUser) {
     txt.textContent = currentUser.firstName;
@@ -62,7 +62,7 @@ function updateAuthBtn() {
 }
 
 function updateWishlistBadge() {
-  const badge = document.getElementById("wishCountBadge");
+  const badge = document.getElementById("wishlistCountBadge");
   if (!badge || !currentUser) return;
   const count = getUserWishlist(currentUser.email).length;
   badge.textContent = count > 0 ? count : "";
@@ -225,7 +225,7 @@ function closeWishlistModal(e) { if (e.target === document.getElementById("wishl
 function renderWishlist() {
   const wishlist = getUserWishlist(currentUser.email);
   const items    = PRODUCTS.filter(p => wishlist.includes(p.id));
-  const container = document.getElementById("wishlistBody");
+  const container = document.getElementById("wishlistItems");
   if (items.length === 0) { container.innerHTML = '<p class="empty-msg">= Your wishlist is empty.<br>Tap the > on any product to save it.</p>'; return; }
   container.innerHTML = items.map(p => `
     <div class="side-item">
@@ -256,7 +256,7 @@ function closeOrdersModal(e) { if (e.target === document.getElementById("ordersO
 
 function renderOrderHistory() {
   const orders = getUserOrders(currentUser.email);
-  const container = document.getElementById("ordersBody");
+  const container = document.getElementById("ordersContent");
   if (orders.length === 0) { container.innerHTML = '<p class="empty-msg">= No orders yet.<br>Place your first order today!</p>'; return; }
   container.innerHTML = orders.map(o => `
     <div class="order-card">
