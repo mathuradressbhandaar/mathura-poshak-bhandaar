@@ -691,3 +691,98 @@ footer a:hover { color: #fff; }
   z-index: 9999; pointer-events: none; white-space: nowrap;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+
+/* ===== PRODUCT IMAGE WRAP (class from app.js) ===== */
+.product-img-wrap {
+  position: relative; overflow: hidden;
+  background: #f5ede8;
+}
+.product-img {
+  width: 100%; height: 220px; object-fit: cover;
+  display: block; transition: transform .3s;
+}
+.product-card:hover .product-img { transform: scale(1.04); }
+
+/* ===== ADD-TO-CART BUTTON (class from app.js) ===== */
+.add-to-cart {
+  background: #8B1A1A; color: #fff;
+  border: none; cursor: pointer;
+  padding: 10px 14px; border-radius: 10px;
+  font-size: .88rem; font-weight: 700; width: 100%;
+  transition: background .2s; margin-top: auto;
+}
+.add-to-cart:hover { background: #6d1414; }
+.add-to-cart:disabled { background: #ccc; cursor: not-allowed; color: #888; }
+
+/* ===== PRODUCT BOTTOM ROW ===== */
+.product-bottom { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+
+/* ===== SEARCH-FILTER BAR (class from index.html) ===== */
+.search-filter-bar {
+  max-width: 1200px; margin: 20px auto 0; padding: 0 20px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.search-filter-inner { display: flex; flex-direction: column; gap: 10px; }
+.search-box {
+  display: flex; align-items: center;
+  background: #fff; border: 2px solid #e8ddd5; border-radius: 50px;
+  padding: 0 16px; gap: 10px; transition: border .2s;
+}
+.search-box:focus-within { border-color: #8B1A1A; }
+.search-icon { font-size: 1rem; color: #aaa; flex-shrink: 0; }
+.search-box input {
+  flex: 1; border: none; outline: none; padding: 12px 0;
+  font-size: .95rem; background: transparent; color: #2d2d2d;
+}
+.search-filter-bar select,
+.search-filter-bar input[type="number"] {
+  padding: 9px 14px; border: 2px solid #e8ddd5; border-radius: 10px;
+  font-size: .85rem; background: #fff; outline: none;
+  transition: border .2s; cursor: pointer; color: #2d2d2d;
+}
+.search-filter-bar select:focus,
+.search-filter-bar input[type="number"]:focus { border-color: #8B1A1A; }
+.search-filter-bar input[type="number"] { width: 90px; }
+.price-range-label { font-size: .82rem; color: #666; font-weight: 600; }
+.clear-filters-btn {
+  padding: 9px 18px; border-radius: 10px;
+  border: 2px solid #e0d0c8; background: #fff;
+  font-size: .85rem; font-weight: 600; color: #888;
+  cursor: pointer; transition: all .2s;
+}
+.clear-filters-btn:hover { border-color: #8B1A1A; color: #8B1A1A; }
+
+/* ===== MOBILE FILTER TOGGLE ===== */
+.filter-toggle-btn { display: none; }
+@media (max-width: 768px) {
+  .filter-toggle-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: #fff; border: 2px solid #e8ddd5; border-radius: 10px;
+    padding: 10px 16px; font-size: .88rem; font-weight: 700;
+    color: #2d2d2d; cursor: pointer; transition: all .2s; width: 100%;
+  }
+  .filter-toggle-btn:hover,
+  .filter-toggle-btn.active { border-color: #8B1A1A; color: #8B1A1A; }
+  .filter-icon { font-size: 1.2rem; }
+  #filterPanel { display: none; flex-direction: column; gap: 10px; }
+  #filterPanel.open { display: flex; }
+  .search-filter-bar select,
+  .search-filter-bar input[type="number"] { width: 100%; }
+  .search-filter-bar .filter-row { flex-direction: column; align-items: stretch; }
+  .price-inputs { justify-content: flex-start; }
+}
+
+/* ===== CHECKOUT FORM BETTER SPACING ===== */
+#orderForm { padding: 16px 24px 20px; }
+#orderForm .form-group { margin-bottom: 14px; }
+.modal .modal-header { padding: 20px 24px; }
+.modal .modal-header h3 { font-size: 1.2rem; font-family: 'Playfair Display', serif; color: #8B1A1A; }
+
+/* ===== THANK YOU SUMMARY ITEMS ===== */
+.ty-customer { font-weight: 700; margin-bottom: 6px; }
+.ty-address { font-size: .82rem; color: #888; margin-bottom: 10px; }
+.ty-items { margin-top: 8px; }
+.ty-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: .86rem; border-bottom: 1px solid #f0e8e0; }
+.ty-item:last-child { border-bottom: none; }
+.ty-total { font-weight: 800; color: #8B1A1A; padding-top: 6px; border-top: 2px solid #f0e8e0; }
