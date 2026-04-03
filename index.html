@@ -61,6 +61,11 @@
         <span class="search-icon">🔍</span>
         <input type="text" id="searchInput" placeholder="Search by name, color, size..." oninput="applyFilters()" />
       </div>
+      <!-- Mobile filter toggle -->
+      <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
+        <span class="filter-icon">&#9776;</span> Filters &amp; Sort
+      </button>
+      <div id="filterPanel">
       <div class="filter-row">
         <select id="filterCategory" onchange="applyFilters()">
           <option value="">🏷️ All Categories</option>
@@ -106,6 +111,7 @@
           <input type="number" id="priceMaxInput" placeholder="Max" min="0" oninput="applyFilters()" />
         </div>
         <button class="clear-filters-btn" onclick="clearFilters()">✕ Clear All</button>
+      </div>
       </div>
     </div>
   </div>
