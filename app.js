@@ -1,5 +1,5 @@
 /* =============================================
-   Mathura Poshak Bhandaar – Main App Logic
+   Mathura Poshak Bhandaar  Main App Logic
    ============================================= */
 
 const ORDERS_API_URL = "https://script.google.com/macros/s/AKfycbwwzRrKZMCmAm2cTWvHExJo9hm4b3kKo7RToM4uiCBCdTGfwLJtBs-F8V9Rh4NK9wOW/exec";
@@ -51,7 +51,7 @@ function updateAuthBtn() {
   if (currentUser) {
     txt.textContent = currentUser.firstName;
     btn.classList.add("logged-in");
-    if (ddName) ddName.textContent = "👤 " + currentUser.firstName + " " + currentUser.lastName;
+    if (ddName) ddName.textContent = "= " + currentUser.firstName + " " + currentUser.lastName;
     if (dd) dd.style.removeProperty("display");
     updateWishlistBadge();
   } else {
@@ -70,7 +70,7 @@ function updateWishlistBadge() {
 }
 
 // =============================================
-// AUTH – OPEN / CLOSE
+// AUTH  OPEN / CLOSE
 // =============================================
 function openAuth(tab) {
   if (currentUser) { toggleUserDropdown(); return; }
@@ -81,23 +81,23 @@ function openAuth(tab) {
 function closeAuth() {
   document.getElementById("authOverlay").classList.remove("open");
   // clear inputs
-  ["loginEmail","loginPassword","regFirstName","regLastName","regEmail","regPhone","regPassword","regConfirmPassword"]
+  ["loginEmail","loginPassword","regFirstName","regLastName","regEmail","regPhone","regPassword","regConfirm"]
     .forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
 }
 
 function closeAuthModal(e) {
-  if (e.target === document.getElementById("authOverlay")) closeAuth();
+  if (!e || e.target === document.getElementById("authOverlay")) closeAuth();
 }
 
 function switchTab(tab) {
-  document.getElementById("loginForm").style.display   = tab === "login"    ? "block" : "none";
-  document.getElementById("registerForm").style.display = tab === "register" ? "block" : "none";
-  document.getElementById("loginTab").classList.toggle("active",    tab === "login");
-  document.getElementById("registerTab").classList.toggle("active", tab === "register");
+  document.getElementById("loginFormBody").style.display   = tab === "login"    ? "block" : "none";
+  document.getElementById("registerFormBody").style.display = tab === "register" ? "block" : "none";
+  document.getElementById("tabLogin").classList.toggle("active",    tab === "login");
+  document.getElementById("tabRegister").classList.toggle("active", tab === "register");
 }
 
 // =============================================
-// AUTH – LOGIN
+// AUTH  LOGIN
 // =============================================
 function doLogin() {
   const email    = (document.getElementById("loginEmail").value || "").trim().toLowerCase();
@@ -105,7 +105,7 @@ function doLogin() {
   if (!email || !password) { showToast("Please enter email and password"); return; }
 
   const user = getUsers().find(u => u.email === email && u.password === password);
-  if (!user) { showToast("❌ Invalid email or password"); return; }
+  if (!user) { showToast("L Invalid email or password"); return; }
 
   currentUser = user;
   localStorage.setItem("mpb_session", email);
@@ -114,11 +114,11 @@ function doLogin() {
   updateAuthBtn();
   closeAuth();
   renderProducts();
-  showToast("Welcome back, " + user.firstName + "! 🎉");
+  showToast("Welcome back, " + user.firstName + "! <");
 }
 
 // =============================================
-// AUTH – REGISTER
+// AUTH  REGISTER
 // =============================================
 function doRegister() {
   const firstName  = (document.getElementById("regFirstName").value || "").trim();
@@ -126,7 +126,7 @@ function doRegister() {
   const email      = (document.getElementById("regEmail").value || "").trim().toLowerCase();
   const phone      = (document.getElementById("regPhone").value || "").trim();
   const password   = (document.getElementById("regPassword").value || "");
-  const confirmPwd = (document.getElementById("regConfirmPassword").value || "");
+  const confirmPwd = (document.getElementById("regConfirm").value || "");
 
   if (!firstName || !lastName || !email || !phone || !password || !confirmPwd) {
     showToast("Please fill all required fields"); return;
@@ -160,11 +160,11 @@ function doRegister() {
   updateAuthBtn();
   closeAuth();
   renderProducts();
-  showToast("Account created! Welcome, " + firstName + "! 🎉");
+  showToast("Account created! Welcome, " + firstName + "! <");
 }
 
 // =============================================
-// AUTH – LOGOUT
+// AUTH  LOGOUT
 // =============================================
 function doLogout() {
   if (currentUser) saveUserCart(currentUser.email, cart);
@@ -194,8 +194,8 @@ function closeUserDropdown() {
 function togglePwd(inputId, btn) {
   const input = document.getElementById(inputId);
   if (!input) return;
-  if (input.type === "password") { input.type = "text";     btn.textContent = "🙈"; }
-  else                           { input.type = "password"; btn.textContent = "👁";  }
+  if (input.type === "password") { input.type = "text";     btn.textContent = "="; }
+  else                           { input.type = "password"; btn.textContent = "=";  }
 }
 
 // =============================================
@@ -206,10 +206,10 @@ function toggleWishlist(id) {
   const wishlist = getUserWishlist(currentUser.email);
   const idx = wishlist.indexOf(id);
   if (idx > -1) { wishlist.splice(idx, 1); showToast("Removed from wishlist"); }
-  else          { wishlist.push(id);        showToast("❤️ Added to wishlist");  }
+  else          { wishlist.push(id);        showToast("d Added to wishlist");  }
   saveUserWishlist(currentUser.email, wishlist);
   const btn = document.getElementById("wish-" + id);
-  if (btn) { btn.classList.toggle("active", wishlist.includes(id)); btn.textContent = wishlist.includes(id) ? "❤️" : "🤍"; }
+  if (btn) { btn.classList.toggle("active", wishlist.includes(id)); btn.textContent = wishlist.includes(id) ? "d" : ">"; }
   updateWishlistBadge();
 }
 
@@ -226,17 +226,17 @@ function renderWishlist() {
   const wishlist = getUserWishlist(currentUser.email);
   const items    = PRODUCTS.filter(p => wishlist.includes(p.id));
   const container = document.getElementById("wishlistItems");
-  if (items.length === 0) { container.innerHTML = '<p class="empty-msg">💔 Your wishlist is empty.<br>Tap the 🤍 on any product to save it.</p>'; return; }
+  if (items.length === 0) { container.innerHTML = '<p class="empty-msg">= Your wishlist is empty.<br>Tap the > on any product to save it.</p>'; return; }
   container.innerHTML = items.map(p => `
     <div class="side-item">
       <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/70x88?text=?'"/>
       <div class="side-item-info">
         <div class="side-item-name">${p.name}</div>
-        <div class="side-item-meta">${p.size} • ${p.color} • ${p.category}</div>
-        <div class="side-item-price">₹${p.price}</div>
+        <div class="side-item-meta">${p.size} " ${p.color} " ${p.category}</div>
+        <div class="side-item-price">�${p.price}</div>
         <div class="side-item-actions">
           <button class="add-to-cart-sm" onclick="addToCart(${p.id})" ${p.stock===0 ? "disabled" : ""}>${p.stock===0 ? "Out of Stock" : "+ Add to Cart"}</button>
-          <button class="remove-sm" onclick="toggleWishlist(${p.id});renderWishlist()">✕ Remove</button>
+          <button class="remove-sm" onclick="toggleWishlist(${p.id});renderWishlist()"> Remove</button>
         </div>
       </div>
     </div>`).join("");
@@ -257,7 +257,7 @@ function closeOrdersModal(e) { if (e.target === document.getElementById("ordersO
 function renderOrderHistory() {
   const orders = getUserOrders(currentUser.email);
   const container = document.getElementById("ordersContent");
-  if (orders.length === 0) { container.innerHTML = '<p class="empty-msg">📭 No orders yet.<br>Place your first order today!</p>'; return; }
+  if (orders.length === 0) { container.innerHTML = '<p class="empty-msg">= No orders yet.<br>Place your first order today!</p>'; return; }
   container.innerHTML = orders.map(o => `
     <div class="order-card">
       <div class="order-card-header">
@@ -265,13 +265,13 @@ function renderOrderHistory() {
           <strong class="order-id">${o.orderId}</strong>
           <span class="order-date">${o.date}</span>
         </div>
-        <div class="order-total">₹${o.total}</div>
+        <div class="order-total">�${o.total}</div>
       </div>
       <div class="order-items-row">
-        ${(o.items || []).map(i => `<span class="order-tag">${i.name} ×${i.qty}</span>`).join("")}
+        ${(o.items || []).map(i => `<span class="order-tag">${i.name} �${i.qty}</span>`).join("")}
       </div>
-      ${o.address ? `<div class="order-address">📍 ${o.address}</div>` : ""}
-      <div class="order-status-badge">✅ Order Placed</div>
+      ${o.address ? `<div class="order-address">= ${o.address}</div>` : ""}
+      <div class="order-status-badge"> Order Placed</div>
     </div>`).join("");
 }
 
@@ -341,13 +341,13 @@ function renderProducts(products) {
       <div class="product-card" id="card-${p.id}">
         <div class="product-img-wrap">
           <img class="product-img" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x400?text=No+Image'"/>
-          <button class="wish-btn ${wished ? "active" : ""}" id="wish-${p.id}" onclick="toggleWishlist(${p.id})" title="Wishlist">${wished ? "❤️" : "🤍"}</button>
+          <button class="wish-btn ${wished ? "active" : ""}" id="wish-${p.id}" onclick="toggleWishlist(${p.id})" title="Wishlist">${wished ? "d" : ">"}</button>
         </div>
         <div class="product-info">
           <div class="product-name">${p.name}</div>
           <div class="product-tags">
             <span class="tag tag-cat">${p.category}</span>
-            <span class="tag tag-size">📏 ${p.size}</span>
+            <span class="tag tag-size">= ${p.size}</span>
             <span class="tag tag-color"><span class="color-dot" style="background:${dot}"></span>${p.color}</span>
           </div>
           <div class="product-bottom">
@@ -371,7 +371,7 @@ function addToCart(id) {
   cart[id] = cart[id] ? { ...cart[id], qty: cart[id].qty + 1 } : { ...product, qty: 1 };
   if (currentUser) saveUserCart(currentUser.email, cart);
   updateCartUI();
-  showToast("✓ " + product.name + " added to cart");
+  showToast(" " + product.name + " added to cart");
 }
 
 function removeFromCart(id) {
