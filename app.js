@@ -569,7 +569,7 @@ async function loadProductsFromSheet(){
     const idCol=col("product_id"),catCol=col("category"),priceCol=col("price");
     const sizeCol=col("size")>=0?col("size"):col("sizes");
     const colorCol=col("colors")>=0?col("colors"):col("color");
-    const stockCol=col("stock"),imgCol=col("image");
+    const stockCol=col("set_quantity")>=0?col("set_quantity"):col("stock"),imgCol=col("image_url")>=0?col("image_url"):col("image");
     const loaded=rows.slice(1).filter(r=>nameCol>=0&&(r[nameCol]||"").trim()).map((row,i)=>{
       const name=(row[nameCol]||"").trim();
       const sizes=((row[sizeCol]||"M")+"").split(",").map(s=>s.trim()).filter(Boolean);
