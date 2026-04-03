@@ -4,6 +4,14 @@
 
 const ORDERS_API_URL = "https://script.google.com/macros/s/AKfycbwwzRrKZMCmAm2cTWvHExJo9hm4b3kKo7RToM4uiCBCdTGfwLJtBs-F8V9Rh4NK9wOW/exec";
 
+// =============================================
+// GOOGLE SHEET SYNC
+// Paste your published Google Sheet CSV URL here
+// File > Share > Publish to web > CSV > Copy link
+// =============================================
+const SHEET_CSV_URL = ""; // paste your CSV URL here
+
+
 let cart = {};
 let currentUser = null;
 
@@ -327,8 +335,11 @@ function renderProducts(products) {
   const wishlist = currentUser ? getUserWishlist(currentUser.email) : [];
 
   const COLOR_DOT = {
-    Blue: "#4a90d9", Red: "#d94a4a", Yellow: "#f5c518", Green: "#4caf50",
-    Pink: "#e91e8c", Orange: "#ff6600", Purple: "#7c4dff", White: "#e0d6ce"
+    "blue":"#4a90d9","red":"#d94a4a","yellow":"#f5c518","green":"#4caf50",
+    "pink":"#e91e8c","orange":"#ff6600","purple":"#7c4dff","white":"#e0d6ce",
+    "black":"#444","teal":"#009688","golden":"#d4a017","gold":"#d4a017",
+    "brown":"#795548","grey":"#9e9e9e","gray":"#9e9e9e","light pink":"#ffb6c1",
+    "sky blue":"#87ceeb","navy":"#1a237e","maroon":"#800000","cream":"#fffdd0"
   };
 
   grid.innerHTML = prods.map(p => {
@@ -336,7 +347,7 @@ function renderProducts(products) {
     const stockText  = p.stock === 0 ? "Out of Stock" : p.stock <= 3 ? `Only ${p.stock} left` : "In Stock";
     const disabled   = p.stock === 0 ? "disabled" : "";
     const wished     = wishlist.includes(p.id);
-    const dot        = COLOR_DOT[p.color] || "#ccc";
+    const dot        = COLOR_DOT[(p.color||"").toLowerCase()] || "#ccc";
     return `
       <div class="product-card" id="card-${p.id}">
         <div class="product-img-wrap">
@@ -524,6 +535,73 @@ function showToast(msg) {
 }
 
 // =============================================
+
+// =============================================
+// GOOGLE SHEET PRODUCT SYNC
+// =============================================
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").split("\n");
+  return lines.map(line=>{
+    const cells=[];let cell="",inQ=false;
+    for(const ch of line){
+      if(ch==='"'){inQ=!inQ;continue;}
+      if(ch===','&&!inQ){cells.push(cell.trim());cell="";continue;}
+      cell+=ch;
+    }
+    cells.push(cell.trim());return cells;
+  }).filter(r=>r.join("").trim());
+}
+function normColor(c){
+  if(!c)return"Red";const s=c.trim();
+  return s.charAt(0).toUpperCase()+s.slice(1).toLowerCase();
+}
+async function loadProductsFromSheet(){
+  if(!SHEET_CSV_URL)return false;
+  try{
+    const resp=await fetch(SHEET_CSV_URL);
+    if(!resp.ok)throw new Error("HTTP "+resp.status);
+    const text=await resp.text();
+    const rows=parseCSV(text);
+    if(rows.length<2)return false;
+    const headers=rows[0].map(h=>h.toLowerCase().replace(/\s+/g,"_").trim());
+    const col=name=>headers.indexOf(name);
+    const nameCol=col("product_name")>=0?col("product_name"):col("name");
+    const idCol=col("product_id"),catCol=col("category"),priceCol=col("price");
+    const sizeCol=col("size")>=0?col("size"):col("sizes");
+    const colorCol=col("colors")>=0?col("colors"):col("color");
+    const stockCol=col("stock"),imgCol=col("image");
+    const loaded=rows.slice(1).filter(r=>nameCol>=0&&(r[nameCol]||"").trim()).map((row,i)=>{
+      const name=(row[nameCol]||"").trim();
+      const sizes=((row[sizeCol]||"M")+"").split(",").map(s=>s.trim()).filter(Boolean);
+      const cols=((row[colorCol]||"Red")+"").split(",").map(c=>normColor(c)).filter(Boolean);
+      const stock=parseInt(row[stockCol])||10;
+      const pid=idCol>=0?(parseInt(row[idCol])||i+1):(i+1);
+      const imgUrl=imgCol>=0?(row[imgCol]||"").trim():"";
+      const cat=catCol>=0?((row[catCol]||"Dress").trim()||"Dress"):"Dress";
+      return{id:pid,name,category:cat,price:parseInt(row[priceCol])||0,
+        size:sizes[0]||"M",color:cols[0]||"Red",stock,
+        image:imgUrl||("https://placehold.co/300x400/f5ede8/8B1A1A?text="+encodeURIComponent(name))};
+    });
+    if(loaded.length===0)return false;
+    window.PRODUCTS=loaded;
+    updateDynamicFilters();
+    return true;
+  }catch(err){
+    console.warn("[Sheet sync failed, using bundled products]",err.message);
+    return false;
+  }
+}
+function updateDynamicFilters(){
+  const cats=[...new Set(PRODUCTS.map(p=>p.category).filter(Boolean))];
+  const sizes=[...new Set(PRODUCTS.map(p=>p.size).filter(Boolean))];
+  const colors=[...new Set(PRODUCTS.map(p=>p.color).filter(Boolean))];
+  const catSel=document.getElementById("filterCategory");
+  if(catSel&&cats.length)catSel.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join("");
+  const sizeSel=document.getElementById("filterSize");
+  if(sizeSel&&sizes.length)sizeSel.innerHTML='<option value="">All Sizes</option>'+sizes.map(s=>`<option value="${s}">${s}</option>`).join("");
+  const colorSel=document.getElementById("filterColor");
+  if(colorSel&&colors.length)colorSel.innerHTML='<option value="">All Colors</option>'+colors.map(c=>`<option value="${c}">${c}</option>`).join("");
+}
 // =============================================
 // FILTER PANEL TOGGLE (mobile)
 // =============================================
@@ -538,9 +616,15 @@ function toggleFilterPanel() {
 // =============================================
 // INITT
 // =============================================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   loadSession();
   renderProducts();
+
+  // Try to load live products from Google Sheet
+  if (SHEET_CSV_URL) {
+    const loaded = await loadProductsFromSheet();
+    if (loaded) renderProducts();
+  }
 
   // Close user dropdown when clicking outside
   document.addEventListener("click", (e) => {
