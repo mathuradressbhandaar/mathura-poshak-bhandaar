@@ -330,7 +330,7 @@ function clearFilters() {
 // RENDER PRODUCTS
 // =============================================
 function renderProducts(products) {
-  const prods    = products !== undefined ? products : PRODUCTS;
+  const prods    = products !== undefined ? products : (window.PRODUCTS||PRODUCTS);
   const grid     = document.getElementById("productsGrid");
   const wishlist = currentUser ? getUserWishlist(currentUser.email) : [];
 
