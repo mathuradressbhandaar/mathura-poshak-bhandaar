@@ -45,8 +45,8 @@ function loadSession() {
 
 function updateAuthBtn() {
   const btn = document.getElementById("authBtn");
-  const txt = document.getElementById("authBtnText");
-  const ddName = document.getElementById("userDropdownName");
+  const txt = document.getElementById("authBtnLabel");
+  const ddName = document.getElementById("dropdownName");
   const dd = document.getElementById("userDropdown");
   if (currentUser) {
     txt.textContent = currentUser.firstName;
@@ -62,7 +62,7 @@ function updateAuthBtn() {
 }
 
 function updateWishlistBadge() {
-  const badge = document.getElementById("wishlistCountBadge");
+  const badge = document.getElementById("wishCountBadge");
   if (!badge || !currentUser) return;
   const count = getUserWishlist(currentUser.email).length;
   badge.textContent = count > 0 ? count : "";
@@ -81,19 +81,19 @@ function openAuth(tab) {
 function closeAuth() {
   document.getElementById("authOverlay").classList.remove("open");
   // clear inputs
-  ["loginEmail","loginPassword","regFirstName","regLastName","regEmail","regPhone","regPassword","regConfirm"]
+  ["loginEmail","loginPassword","regFirstName","regLastName","regEmail","regPhone","regPassword","regConfirmPassword"]
     .forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
 }
 
 function closeAuthModal(e) {
-  if (!e || e.target === document.getElementById("authOverlay")) closeAuth();
+  if (e.target === document.getElementById("authOverlay")) closeAuth();
 }
 
 function switchTab(tab) {
-  document.getElementById("loginFormBody").style.display   = tab === "login"    ? "block" : "none";
-  document.getElementById("registerFormBody").style.display = tab === "register" ? "block" : "none";
-  document.getElementById("tabLogin").classList.toggle("active",    tab === "login");
-  document.getElementById("tabRegister").classList.toggle("active", tab === "register");
+  document.getElementById("loginForm").style.display   = tab === "login"    ? "block" : "none";
+  document.getElementById("registerForm").style.display = tab === "register" ? "block" : "none";
+  document.getElementById("loginTab").classList.toggle("active",    tab === "login");
+  document.getElementById("registerTab").classList.toggle("active", tab === "register");
 }
 
 // =============================================
@@ -126,7 +126,7 @@ function doRegister() {
   const email      = (document.getElementById("regEmail").value || "").trim().toLowerCase();
   const phone      = (document.getElementById("regPhone").value || "").trim();
   const password   = (document.getElementById("regPassword").value || "");
-  const confirmPwd = (document.getElementById("regConfirm").value || "");
+  const confirmPwd = (document.getElementById("regConfirmPassword").value || "");
 
   if (!firstName || !lastName || !email || !phone || !password || !confirmPwd) {
     showToast("Please fill all required fields"); return;
@@ -225,7 +225,7 @@ function closeWishlistModal(e) { if (e.target === document.getElementById("wishl
 function renderWishlist() {
   const wishlist = getUserWishlist(currentUser.email);
   const items    = PRODUCTS.filter(p => wishlist.includes(p.id));
-  const container = document.getElementById("wishlistItems");
+  const container = document.getElementById("wishlistBody");
   if (items.length === 0) { container.innerHTML = '<p class="empty-msg">= Your wishlist is empty.<br>Tap the > on any product to save it.</p>'; return; }
   container.innerHTML = items.map(p => `
     <div class="side-item">
@@ -256,7 +256,7 @@ function closeOrdersModal(e) { if (e.target === document.getElementById("ordersO
 
 function renderOrderHistory() {
   const orders = getUserOrders(currentUser.email);
-  const container = document.getElementById("ordersContent");
+  const container = document.getElementById("ordersBody");
   if (orders.length === 0) { container.innerHTML = '<p class="empty-msg">= No orders yet.<br>Place your first order today!</p>'; return; }
   container.innerHTML = orders.map(o => `
     <div class="order-card">
