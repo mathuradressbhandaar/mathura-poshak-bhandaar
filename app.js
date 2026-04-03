@@ -209,7 +209,7 @@ function toggleWishlist(id) {
   else          { wishlist.push(id);        showToast("d Added to wishlist");  }
   saveUserWishlist(currentUser.email, wishlist);
   const btn = document.getElementById("wish-" + id);
-  if (btn) { btn.classList.toggle("active", wishlist.includes(id)); btn.textContent = wishlist.includes(id) ? "d" : ">"; }
+  if (btn) { btn.classList.toggle("active", wishlist.includes(id)); }
   updateWishlistBadge();
 }
 
@@ -233,7 +233,7 @@ function renderWishlist() {
       <div class="side-item-info">
         <div class="side-item-name">${p.name}</div>
         <div class="side-item-meta">${p.size} " ${p.color} " ${p.category}</div>
-        <div class="side-item-price">�${p.price}</div>
+        <div class="side-item-price">x${p.price}</div>
         <div class="side-item-actions">
           <button class="add-to-cart-sm" onclick="addToCart(${p.id})" ${p.stock===0 ? "disabled" : ""}>${p.stock===0 ? "Out of Stock" : "+ Add to Cart"}</button>
           <button class="remove-sm" onclick="toggleWishlist(${p.id});renderWishlist()"> Remove</button>
@@ -265,10 +265,10 @@ function renderOrderHistory() {
           <strong class="order-id">${o.orderId}</strong>
           <span class="order-date">${o.date}</span>
         </div>
-        <div class="order-total">�${o.total}</div>
+        <div class="order-total">x${o.total}</div>
       </div>
       <div class="order-items-row">
-        ${(o.items || []).map(i => `<span class="order-tag">${i.name} �${i.qty}</span>`).join("")}
+        ${(o.items || []).map(i => `<span class="order-tag">${i.name} x${i.qty}</span>`).join("")}
       </div>
       ${o.address ? `<div class="order-address">= ${o.address}</div>` : ""}
       <div class="order-status-badge"> Order Placed</div>
@@ -341,7 +341,7 @@ function renderProducts(products) {
       <div class="product-card" id="card-${p.id}">
         <div class="product-img-wrap">
           <img class="product-img" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x400?text=No+Image'"/>
-          <button class="wish-btn ${wished ? "active" : ""}" id="wish-${p.id}" onclick="toggleWishlist(${p.id})" title="Wishlist">${wished ? "d" : ">"}</button>
+          <button class="wish-btn ${wished ? "active" : ""}" id="wish-${p.id}" onclick="toggleWishlist(${p.id})" title="Wishlist">&#9829;</button>
         </div>
         <div class="product-info">
           <div class="product-name">${p.name}</div>
@@ -414,7 +414,7 @@ function updateCartUI() {
         </div>
       </div>
     </div>`).join("");
-  document.getElementById("cartTotal").textContent = "&#8377;" + total;
+  document.getElementById("cartTotal").innerHTML = "&#8377;" + total;
   document.getElementById("cartFooter").style.display = "block";
 }
 
@@ -524,7 +524,19 @@ function showToast(msg) {
 }
 
 // =============================================
-// INIT
+// =============================================
+// FILTER PANEL TOGGLE (mobile)
+// =============================================
+function toggleFilterPanel() {
+  const panel = document.getElementById("filterPanel");
+  const btn   = document.getElementById("filterToggleBtn");
+  if (!panel) return;
+  const isOpen = panel.classList.toggle("open");
+  if (btn) btn.classList.toggle("active", isOpen);
+}
+
+// =============================================
+// INITT
 // =============================================
 document.addEventListener("DOMContentLoaded", () => {
   loadSession();
