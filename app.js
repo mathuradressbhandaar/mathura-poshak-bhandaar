@@ -47,14 +47,17 @@ function updateAuthBtn() {
   const btn = document.getElementById("authBtn");
   const txt = document.getElementById("authBtnText");
   const ddName = document.getElementById("userDropdownName");
+  const dd = document.getElementById("userDropdown");
   if (currentUser) {
     txt.textContent = currentUser.firstName;
     btn.classList.add("logged-in");
     if (ddName) ddName.textContent = "👤 " + currentUser.firstName + " " + currentUser.lastName;
+    if (dd) dd.style.removeProperty("display");
     updateWishlistBadge();
   } else {
     txt.textContent = "Login";
     btn.classList.remove("logged-in");
+    if (dd) { dd.style.display = "none"; dd.classList.remove("open"); }
   }
 }
 
