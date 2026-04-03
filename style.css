@@ -599,3 +599,95 @@ footer a:hover { color: #fff; }
   .hero { padding: 40px 16px 36px; }
   .hero h1 { font-size: 1.5rem; }
 }
+
+
+/* ===== CART SIDEBAR (separate from overlay) ===== */
+.cart-sidebar {
+  position: fixed; top: 0; right: 0;
+  width: 100%; max-width: 420px; height: 100vh;
+  background: #fff; display: flex; flex-direction: column;
+  box-shadow: -8px 0 30px rgba(0,0,0,.15);
+  z-index: 350;
+  transform: translateX(100%);
+  transition: transform .3s ease;
+}
+.cart-sidebar.open { transform: translateX(0); }
+
+/* ===== GENERIC MODAL BOX ===== */
+.modal {
+  background: #fff; border-radius: 20px;
+  width: 100%; max-width: 500px;
+  max-height: 88vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  animation: slideUp .3s ease;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-bottom: 2px solid #f0e8e0;
+  position: sticky; top: 0; background: #fff; z-index: 1;
+}
+.modal-header h3 { font-family: 'Playfair Display', serif; color: #8B1A1A; font-size: 1.2rem; }
+.close-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 1.3rem; color: #888;
+  padding: 4px 8px; border-radius: 8px;
+  transition: background .2s, color .2s;
+}
+.close-btn:hover { color: #c0392b; background: #fdecea; }
+
+/* ===== ORDER SUMMARY (checkout modal) ===== */
+.order-summary {
+  padding: 12px 24px; background: #fdf8f3;
+  border-bottom: 2px solid #f0e8e0;
+  font-size: .86rem; color: #555;
+}
+.order-summary-item { display: flex; justify-content: space-between; padding: 4px 0; }
+.order-summary-total {
+  font-weight: 800; color: #8B1A1A;
+  border-top: 2px solid #f0e8e0;
+  margin-top: 6px; padding-top: 6px;
+  display: flex; justify-content: space-between;
+}
+
+/* ===== CHECKOUT SUBMIT BUTTON ===== */
+.submit-btn {
+  width: 100%; padding: 13px;
+  background: #8B1A1A; color: #fff;
+  border: none; border-radius: 10px;
+  font-size: .95rem; font-weight: 700;
+  cursor: pointer; transition: background .2s; margin-top: 8px;
+}
+.submit-btn:hover { background: #6d1414; }
+.submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+/* ===== THANK YOU MODAL SUB-ELEMENTS ===== */
+.thankyou-header { text-align: center; padding: 0 16px 16px; }
+.thankyou-icon { font-size: 3.5rem; margin-bottom: 12px; }
+.thankyou-subtitle { color: #666; font-size: .9rem; margin-top: 6px; }
+.thankyou-body { padding: 0 8px 8px; }
+.thankyou-footer { text-align: center; padding-top: 16px; }
+.continue-btn {
+  padding: 12px 36px; background: #8B1A1A; color: #fff;
+  border: none; border-radius: 10px;
+  font-size: .95rem; font-weight: 700;
+  cursor: pointer; transition: background .2s;
+}
+.continue-btn:hover { background: #6d1414; }
+.thankyou-summary { font-size: .85rem; color: #666; margin-top: 10px; text-align: left; }
+
+/* ===== ORDER HISTORY DISPLAY ===== */
+.order-items-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.order-address { font-size: .8rem; color: #888; margin-bottom: 8px; }
+.order-total { font-weight: 800; color: #8B1A1A; font-size: 1rem; }
+
+/* ===== TOAST NOTIFICATION ===== */
+.toast {
+  position: fixed; bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #333; color: #fff;
+  padding: 12px 24px; border-radius: 24px;
+  font-size: .88rem; font-weight: 600;
+  opacity: 0; transition: all .3s ease;
+  z-index: 9999; pointer-events: none; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
