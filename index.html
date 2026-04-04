@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mathura Poshak Bhandaar â Wholesale Dress Store</title>
+  <title>Mathura Poshak Bhandaar – Wholesale Dress Store</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=2" />
 </head>
@@ -13,7 +13,7 @@
   <header>
     <div class="header-inner">
       <div class="logo">
-        <span class="logo-icon">ðª·</span>
+        <span class="logo-icon">🪷</span>
         <div>
           <div class="logo-title">Mathura Poshak Bhandaar</div>
           <div class="logo-sub">Wholesale Dress Store</div>
@@ -28,18 +28,19 @@
         <!-- AUTH BUTTON + DROPDOWN -->
         <div class="auth-wrap">
           <button class="auth-btn" id="authBtn" onclick="openAuth('login')">
-            ð¤ <span id="authBtnText">Login</span>
+            👤 <span id="authBtnText">Login</span>
           </button>
+          <!-- User dropdown (shown when logged in) -->
           <div class="user-dropdown" id="userDropdown">
             <div class="user-dropdown-name" id="userDropdownName"></div>
-            <button onclick="openWishlist()">â¤ï¸ My Wishlist <span id="wishlistCountBadge" class="badge"></span></button>
-            <button onclick="openOrderHistory()">ð¦ Order History</button>
-            <button class="logout-btn" onclick="doLogout()">ðª Logout</button>
+            <button onclick="openWishlist()">❤️ My Wishlist <span id="wishlistCountBadge" class="badge"></span></button>
+            <button onclick="openOrderHistory()">📦 Order History</button>
+            <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
           </div>
         </div>
 
         <button class="cart-btn" onclick="toggleCart()">
-          ð Cart <span class="cart-count" id="cartCount">0</span>
+          🛒 Cart <span class="cart-count" id="cartCount">0</span>
         </button>
       </div>
     </div>
@@ -57,61 +58,63 @@
   <!-- SEARCH & FILTER BAR -->
   <div class="search-filter-bar">
     <div class="search-filter-inner">
+      <!-- Row 1: Search -->
       <div class="search-box">
-        <span class="search-icon">ð</span>
+        <span class="search-icon">🔍</span>
         <input type="text" id="searchInput" placeholder="Search by name, color, size..." oninput="applyFilters()" />
       </div>
-      <!-- Mobile filter toggle -->
+      <!-- Mobile filter toggle button -->
       <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
         <span class="filter-icon">&#9776;</span> Filters &amp; Sort
       </button>
+      <!-- Row 2 & 3: Dropdowns + Price Range (collapsible on mobile) -->
       <div id="filterPanel">
-      <div class="filter-row">
-        <select id="filterCategory" onchange="applyFilters()">
-          <option value="">ð·ï¸ All Categories</option>
-          <option value="Poshak">Poshak</option>
-          <option value="Dress">Dress</option>
-          <option value="Set">Set</option>
-        </select>
-        <select id="filterSize" onchange="applyFilters()">
-          <option value="">ð All Sizes</option>
-          <option value="S">S</option>
-          <option value="M">M</option>
-          <option value="L">L</option>
-          <option value="XL">XL</option>
-        </select>
-        <select id="filterColor" onchange="applyFilters()">
-          <option value="">ð¨ All Colors</option>
-          <option value="Blue">Blue</option>
-          <option value="Red">Red</option>
-          <option value="Yellow">Yellow</option>
-          <option value="Green">Green</option>
-          <option value="Pink">Pink</option>
-          <option value="Orange">Orange</option>
-          <option value="Purple">Purple</option>
-          <option value="White">White</option>
-        </select>
-        <select id="filterStock" onchange="applyFilters()">
-          <option value="">ð¦ All Stock</option>
-          <option value="in_stock">In Stock</option>
-          <option value="low_stock">Low Stock</option>
-          <option value="out_stock">Out of Stock</option>
-        </select>
-        <select id="sortPrice" onchange="applyFilters()">
-          <option value="">â¬ï¸ Sort by Price</option>
-          <option value="low_high">Price: Low â High</option>
-          <option value="high_low">Price: High â Low</option>
-        </select>
-      </div>
-      <div class="price-range-row">
-        <span class="price-range-label">â¹ Price Range:</span>
-        <div class="price-inputs">
-          <input type="number" id="priceMinInput" placeholder="Min" min="0" oninput="applyFilters()" />
-          <span class="price-dash">â</span>
-          <input type="number" id="priceMaxInput" placeholder="Max" min="0" oninput="applyFilters()" />
+        <div class="filter-row">
+          <select id="filterCategory" onchange="applyFilters()">
+            <option value="">🏷️ All Categories</option>
+            <option value="Poshak">Poshak</option>
+            <option value="Dress">Dress</option>
+            <option value="Set">Set</option>
+          </select>
+          <select id="filterSize" onchange="applyFilters()">
+            <option value="">📏 All Sizes</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+          </select>
+          <select id="filterColor" onchange="applyFilters()">
+            <option value="">🎨 All Colors</option>
+            <option value="Blue">Blue</option>
+            <option value="Red">Red</option>
+            <option value="Yellow">Yellow</option>
+            <option value="Green">Green</option>
+            <option value="Pink">Pink</option>
+            <option value="Orange">Orange</option>
+            <option value="Purple">Purple</option>
+            <option value="White">White</option>
+          </select>
+          <select id="filterStock" onchange="applyFilters()">
+            <option value="">📦 All Stock</option>
+            <option value="in_stock">In Stock</option>
+            <option value="low_stock">Low Stock</option>
+            <option value="out_stock">Out of Stock</option>
+          </select>
+          <select id="sortPrice" onchange="applyFilters()">
+            <option value="">&#8679; Sort by Price</option>
+            <option value="low_high">Price: Low → High</option>
+            <option value="high_low">Price: High → Low</option>
+          </select>
         </div>
-        <button class="clear-filters-btn" onclick="clearFilters()">â Clear All</button>
-      </div>
+        <div class="price-range-row">
+          <span class="price-range-label">&#8377; Price Range:</span>
+          <div class="price-inputs">
+            <input type="number" id="priceMinInput" placeholder="Min" min="0" oninput="applyFilters()" />
+            <span class="price-dash">—</span>
+            <input type="number" id="priceMaxInput" placeholder="Max" min="0" oninput="applyFilters()" />
+          </div>
+          <button class="clear-filters-btn" onclick="clearFilters()">&#10005; Clear All</button>
+        </div>
       </div>
     </div>
   </div>
@@ -120,7 +123,7 @@
   <section id="products" class="products-section">
     <div class="section-header">
       <h2>Our Collection</h2>
-      <p>All sizes available â¢ Bulk discount on orders above â¹2000</p>
+      <p>All sizes available • Bulk discount on orders above ₹2000</p>
     </div>
     <div class="no-results" id="noResults" style="display:none">No products found. Try a different search or filter.</div>
     <div class="products-grid" id="productsGrid"></div>
@@ -131,14 +134,14 @@
   <div class="cart-sidebar" id="cartSidebar">
     <div class="cart-header">
       <h2>Your Cart</h2>
-      <button onclick="toggleCart()" class="close-cart">â</button>
+      <button onclick="toggleCart()" class="close-cart">✕</button>
     </div>
     <div class="cart-items" id="cartItems">
       <p class="empty-cart">Your cart is empty</p>
     </div>
     <div class="cart-footer" id="cartFooter" style="display:none">
       <div class="cart-total">
-        Total: <strong id="cartTotal">â¹0</strong>
+        Total: <strong id="cartTotal">₹0</strong>
       </div>
       <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout</button>
     </div>
@@ -149,7 +152,7 @@
     <div class="modal">
       <div class="modal-header">
         <h3>Complete Your Order</h3>
-        <button onclick="closeCheckout()" class="close-btn">â</button>
+        <button onclick="closeCheckout()" class="close-btn">✕</button>
       </div>
       <div class="order-summary" id="orderSummary"></div>
       <form id="orderForm" onsubmit="submitOrder(event)">
@@ -182,7 +185,7 @@
   <div class="overlay" id="thankYouOverlay">
     <div class="modal thankyou-modal">
       <div class="thankyou-header">
-        <div class="thankyou-icon">â</div>
+        <div class="thankyou-icon">✅</div>
         <h2>Order Placed Successfully!</h2>
         <p class="thankyou-subtitle">Thank you! We will contact you shortly to confirm your order.</p>
       </div>
@@ -202,16 +205,19 @@
   <!-- AUTH MODAL (Login / Register) -->
   <div class="overlay" id="authOverlay" onclick="closeAuthModal(event)">
     <div class="modal auth-modal">
+      <!-- Tabs -->
       <div class="auth-tabs">
         <button class="auth-tab active" id="loginTab" onclick="switchTab('login')">Login</button>
         <button class="auth-tab" id="registerTab" onclick="switchTab('register')">Register</button>
-        <button class="close-btn auth-close" onclick="closeAuth()">â</button>
+        <button class="close-btn auth-close" onclick="closeAuth()">✕</button>
       </div>
+
+      <!-- LOGIN FORM -->
       <div id="loginForm" class="auth-form">
         <div class="auth-form-header">
-          <div class="auth-icon">ð</div>
+          <div class="auth-icon">🔐</div>
           <h3>Welcome Back</h3>
-          <p>Login to access your cart, orders &amp; wishlist</p>
+          <p>Login to access your cart, orders & wishlist</p>
         </div>
         <div class="auth-body">
           <div class="form-group">
@@ -222,16 +228,18 @@
             <label>Password *</label>
             <div class="pwd-wrap">
               <input type="password" id="loginPassword" placeholder="Enter your password" />
-              <button type="button" class="pwd-toggle" onclick="togglePwd('loginPassword', this)">ð</button>
+              <button type="button" class="pwd-toggle" onclick="togglePwd('loginPassword', this)">👁</button>
             </div>
           </div>
-          <button class="submit-btn" onclick="doLogin()">Login â</button>
+          <button class="submit-btn" onclick="doLogin()">Login →</button>
           <p class="auth-switch">Don't have an account? <a onclick="switchTab('register')">Register here</a></p>
         </div>
       </div>
+
+      <!-- REGISTER FORM -->
       <div id="registerForm" class="auth-form" style="display:none">
         <div class="auth-form-header">
-          <div class="auth-icon">â¨</div>
+          <div class="auth-icon">✨</div>
           <h3>Create Account</h3>
           <p>Join us to enjoy a personalised shopping experience</p>
         </div>
@@ -258,17 +266,17 @@
             <label>Password *</label>
             <div class="pwd-wrap">
               <input type="password" id="regPassword" placeholder="Minimum 6 characters" />
-              <button type="button" class="pwd-toggle" onclick="togglePwd('regPassword', this)">ð</button>
+              <button type="button" class="pwd-toggle" onclick="togglePwd('regPassword', this)">👁</button>
             </div>
           </div>
           <div class="form-group">
             <label>Confirm Password *</label>
             <div class="pwd-wrap">
               <input type="password" id="regConfirmPassword" placeholder="Re-enter password" />
-              <button type="button" class="pwd-toggle" onclick="togglePwd('regConfirmPassword', this)">ð</button>
+              <button type="button" class="pwd-toggle" onclick="togglePwd('regConfirmPassword', this)">👁</button>
             </div>
           </div>
-          <button class="submit-btn" onclick="doRegister()">Create Account â</button>
+          <button class="submit-btn" onclick="doRegister()">Create Account →</button>
           <p class="auth-switch">Already have an account? <a onclick="switchTab('login')">Login here</a></p>
         </div>
       </div>
@@ -277,10 +285,10 @@
 
   <!-- WISHLIST MODAL -->
   <div class="side-modal-overlay" id="wishlistOverlay" onclick="closeWishlistModal(event)">
-    <div class="modal side-modal">
-      <div class="modal-header">
-        <h3>â¤ï¸ My Wishlist</h3>
-        <button onclick="closeWishlist()" class="close-btn">â</button>
+    <div class="side-modal">
+      <div class="side-modal-header">
+        <h2>❤️ My Wishlist</h2>
+        <button onclick="closeWishlist()" class="close-side-modal">✕</button>
       </div>
       <div class="side-modal-body" id="wishlistItems">
         <p class="empty-msg">Your wishlist is empty.</p>
@@ -290,10 +298,10 @@
 
   <!-- ORDER HISTORY MODAL -->
   <div class="side-modal-overlay" id="ordersOverlay" onclick="closeOrdersModal(event)">
-    <div class="modal side-modal">
-      <div class="modal-header">
-        <h3>ð¦ Order History</h3>
-        <button onclick="closeOrderHistory()" class="close-btn">â</button>
+    <div class="side-modal">
+      <div class="side-modal-header">
+        <h2>📦 Order History</h2>
+        <button onclick="closeOrderHistory()" class="close-side-modal">✕</button>
       </div>
       <div class="side-modal-body" id="ordersContent">
         <p class="empty-msg">No orders yet.</p>
@@ -308,19 +316,19 @@
   <footer>
     <div class="footer-inner">
       <div class="footer-brand">
-        <span>ðª· Mathura Poshak Bhandaar</span>
+        <span>🪷 Mathura Poshak Bhandaar</span>
         <p>Quality wholesale dresses since years. Trusted by retailers across India.</p>
       </div>
       <div class="footer-contact">
-        <p>ð <a href="tel:+919760096109">+91 97600 96109</a></p>
-        <p>ð¬ <a href="https://wa.me/919760096109" target="_blank">WhatsApp Us</a></p>
-        <p>ð§ <a href="mailto:mathura.dress.bhandaar@gmail.com">mathura.dress.bhandaar@gmail.com</a></p>
+        <p>📞 <a href="tel:+919760096109">+91 97600 96109</a></p>
+        <p>💬 <a href="https://wa.me/919760096109" target="_blank">WhatsApp Us</a></p>
+        <p>📧 <a href="mailto:mathura.dress.bhandaar@gmail.com">mathura.dress.bhandaar@gmail.com</a></p>
       </div>
     </div>
-    <div class="footer-bottom">Â© 2026 Mathura Poshak Bhandaar. All rights reserved.</div>
+    <div class="footer-bottom">© 2026 Mathura Poshak Bhandaar. All rights reserved.</div>
   </footer>
 
-  <script src="products.js?v=4"></script>
+  <script src="products.js?v=3"></script>
   <script src="app.js?v=7"></script>
 </body>
 </html>
