@@ -522,7 +522,9 @@ async function submitOrder(e) {
     cart = {};
     if (currentUser) saveUserCart(currentUser.email, {});
     updateCartUI();
-    closeChecument.getElementById("cartOverlay").classList.remove("open");
+    closeCheckout();
+    document.getElementById("cartSidebar").classList.remove("open");
+    document.getElementById("cartOverlay").classList.remove("open");
     document.getElementById("orderForm").reset();
     document.getElementById("thankYouOverlay").classList.add("open");
 
@@ -617,10 +619,6 @@ async function loadProductsFromSheet() {
 
     if (loaded.length === 0) return false;
     window.PRODUCTS = loaded;
-    updateDynamicFilters();
-    return true;
-  } catch (err) {
-    console. loaded;
     updateDynamicFilters();
     return true;
   } catch (err) {
