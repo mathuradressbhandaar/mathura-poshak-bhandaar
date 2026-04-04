@@ -231,7 +231,7 @@ function closeWishlistModal(e) { if (e.target === document.getElementById("wishl
 
 function renderWishlist() {
   const wishlist = getUserWishlist(currentUser.email);
-  const items    = PRODUCTS.filter(p => wishlist.includes(p.id));
+  const items    = (window.PRODUCTS || PRODUCTS).filter(p => wishlist.includes(p.id));
   const container = document.getElementById("wishlistItems");
   if (items.length === 0) { container.innerHTML = '<p class="empty-msg">💔 Your wishlist is empty.<br>Tap the 🤍 on any product to save it.</p>'; return; }
   container.innerHTML = items.map(p => `
@@ -295,7 +295,7 @@ function applyFilters() {
   const minP     = parseInt(document.getElementById("priceMinInput").value) || 0;
   const maxP     = parseInt(document.getElementById("priceMaxInput").value) || 999999;
 
-  let filtered = [...PRODUCTS];
+  let filtered = [...(window.PRODUCTS || PRODUCTS)];
 
   if (search) filtered = filtered.filter(p => {
     const pSizes  = (p.sizes  || [p.size  || ""]).map(s => s.toLowerCase());
@@ -333,7 +333,7 @@ function clearFilters() {
 // RENDER PRODUCTS
 // =============================================
 function renderProducts(products) {
-  const prods    = products !== undefined ? products : PRODUCTS;
+  const prods    = products !== undefined ? products : (window.PRODUCTS || PRODUCTS);
   const grid     = document.getElementById("productsGrid");
   const wishlist = currentUser ? getUserWishlist(currentUser.email) : [];
 
@@ -391,7 +391,7 @@ function renderProducts(products) {
 // CART
 // =============================================
 function addToCart(id) {
-  const product = PRODUCTS.find(p => p.id === id);
+  const product = (window.PRODUCTS || PRODUCTS).find(p => p.id === id);
   if (!product || product.stock === 0) return;
   cart[id] = cart[id] ? { ...cart[id], qty: cart[id].qty + 1 } : { ...product, qty: 1 };
   if (currentUser) saveUserCart(currentUser.email, cart);
@@ -522,9 +522,7 @@ async function submitOrder(e) {
     cart = {};
     if (currentUser) saveUserCart(currentUser.email, {});
     updateCartUI();
-    closeCheckout();
-    document.getElementById("cartSidebar").classList.remove("open");
-    document.getElementById("cartOverlay").classList.remove("open");
+    closeChecument.getElementById("cartOverlay").classList.remove("open");
     document.getElementById("orderForm").reset();
     document.getElementById("thankYouOverlay").classList.add("open");
 
@@ -619,6 +617,10 @@ async function loadProductsFromSheet() {
 
     if (loaded.length === 0) return false;
     window.PRODUCTS = loaded;
+    updateDynamicFilters();
+    return true;
+  } catch (err) {
+    console. loaded;
     updateDynamicFilters();
     return true;
   } catch (err) {
