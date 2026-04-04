@@ -1,5 +1,5 @@
 /* =============================================
-   Mathura Poshak Bhandaar  Main App Logic
+   Mathura Poshak Bhandaar – Main App Logic
    ============================================= */
 
 const ORDERS_API_URL = "https://script.google.com/macros/s/AKfycbwwzRrKZMCmAm2cTWvHExJo9hm4b3kKo7RToM4uiCBCdTGfwLJtBs-F8V9Rh4NK9wOW/exec";
@@ -7,10 +7,9 @@ const ORDERS_API_URL = "https://script.google.com/macros/s/AKfycbwwzRrKZMCmAm2cT
 // =============================================
 // GOOGLE SHEET SYNC
 // Paste your published Google Sheet CSV URL here
-// File > Share > Publish to web > CSV > Copy link
+// (File → Share → Publish to web → CSV → Copy link)
 // =============================================
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTUoprJDH_LmaXwL1RFDTdlBXxg2tqbHm9SvMTOQtIz9Y6MuAy9zXch3DQzA09QQ0pT2NRyjsoK3isf/pub?gid=0&single=true&output=csv"; // paste your CSV URL here
-
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTUoprJDH_LmaXwL1RFDTdlBXxg2tqbHm9SvMTOQtIz9Y6MuAy9zXch3DQzA09QQ0pT2NRyjsoK3isf/pub?gid=0&single=true&output=csv";
 
 let cart = {};
 let currentUser = null;
@@ -59,8 +58,8 @@ function updateAuthBtn() {
   if (currentUser) {
     txt.textContent = currentUser.firstName;
     btn.classList.add("logged-in");
-    if (ddName) ddName.textContent = "= " + currentUser.firstName + " " + currentUser.lastName;
-    if (dd) dd.style.removeProperty("display");
+    if (ddName) ddName.textContent = "👤 " + currentUser.firstName + " " + currentUser.lastName;
+    if (dd) dd.style.removeProperty("display"); // let CSS/class control visibility
     updateWishlistBadge();
   } else {
     txt.textContent = "Login";
@@ -78,7 +77,7 @@ function updateWishlistBadge() {
 }
 
 // =============================================
-// AUTH  OPEN / CLOSE
+// AUTH – OPEN / CLOSE
 // =============================================
 function openAuth(tab) {
   if (currentUser) { toggleUserDropdown(); return; }
@@ -94,7 +93,7 @@ function closeAuth() {
 }
 
 function closeAuthModal(e) {
-  if (e.target === document.getElementById("authOverlay")) closeAuth();
+  if (!e || e.target === document.getElementById("authOverlay")) closeAuth();
 }
 
 function switchTab(tab) {
@@ -105,7 +104,7 @@ function switchTab(tab) {
 }
 
 // =============================================
-// AUTH  LOGIN
+// AUTH – LOGIN
 // =============================================
 function doLogin() {
   const email    = (document.getElementById("loginEmail").value || "").trim().toLowerCase();
@@ -113,7 +112,7 @@ function doLogin() {
   if (!email || !password) { showToast("Please enter email and password"); return; }
 
   const user = getUsers().find(u => u.email === email && u.password === password);
-  if (!user) { showToast("L Invalid email or password"); return; }
+  if (!user) { showToast("❌ Invalid email or password"); return; }
 
   currentUser = user;
   localStorage.setItem("mpb_session", email);
@@ -122,11 +121,11 @@ function doLogin() {
   updateAuthBtn();
   closeAuth();
   renderProducts();
-  showToast("Welcome back, " + user.firstName + "! <");
+  showToast("Welcome back, " + user.firstName + "! 🎉");
 }
 
 // =============================================
-// AUTH  REGISTER
+// AUTH – REGISTER
 // =============================================
 function doRegister() {
   const firstName  = (document.getElementById("regFirstName").value || "").trim();
@@ -168,11 +167,11 @@ function doRegister() {
   updateAuthBtn();
   closeAuth();
   renderProducts();
-  showToast("Account created! Welcome, " + firstName + "! <");
+  showToast("Account created! Welcome, " + firstName + "! 🎉");
 }
 
 // =============================================
-// AUTH  LOGOUT
+// AUTH – LOGOUT
 // =============================================
 function doLogout() {
   if (currentUser) saveUserCart(currentUser.email, cart);
@@ -202,8 +201,8 @@ function closeUserDropdown() {
 function togglePwd(inputId, btn) {
   const input = document.getElementById(inputId);
   if (!input) return;
-  if (input.type === "password") { input.type = "text";     btn.textContent = "="; }
-  else                           { input.type = "password"; btn.textContent = "=";  }
+  if (input.type === "password") { input.type = "text";     btn.textContent = "🙈"; }
+  else                           { input.type = "password"; btn.textContent = "👁";  }
 }
 
 // =============================================
@@ -214,7 +213,7 @@ function toggleWishlist(id) {
   const wishlist = getUserWishlist(currentUser.email);
   const idx = wishlist.indexOf(id);
   if (idx > -1) { wishlist.splice(idx, 1); showToast("Removed from wishlist"); }
-  else          { wishlist.push(id);        showToast("d Added to wishlist");  }
+  else          { wishlist.push(id);        showToast("❤️ Added to wishlist");  }
   saveUserWishlist(currentUser.email, wishlist);
   const btn = document.getElementById("wish-" + id);
   if (btn) { btn.classList.toggle("active", wishlist.includes(id)); }
@@ -234,17 +233,17 @@ function renderWishlist() {
   const wishlist = getUserWishlist(currentUser.email);
   const items    = PRODUCTS.filter(p => wishlist.includes(p.id));
   const container = document.getElementById("wishlistItems");
-  if (items.length === 0) { container.innerHTML = '<p class="empty-msg">= Your wishlist is empty.<br>Tap the > on any product to save it.</p>'; return; }
+  if (items.length === 0) { container.innerHTML = '<p class="empty-msg">💔 Your wishlist is empty.<br>Tap the 🤍 on any product to save it.</p>'; return; }
   container.innerHTML = items.map(p => `
     <div class="side-item">
       <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/70x88?text=?'"/>
       <div class="side-item-info">
         <div class="side-item-name">${p.name}</div>
-        <div class="side-item-meta">${p.size} " ${p.color} " ${p.category}</div>
-        <div class="side-item-price">x${p.price}</div>
+        <div class="side-item-meta">${(p.sizes||[p.size]).join(", ")} • ${(p.colors||[p.color]).join(", ")} • ${p.category}</div>
+        <div class="side-item-price">₹${p.price}</div>
         <div class="side-item-actions">
           <button class="add-to-cart-sm" onclick="addToCart(${p.id})" ${p.stock===0 ? "disabled" : ""}>${p.stock===0 ? "Out of Stock" : "+ Add to Cart"}</button>
-          <button class="remove-sm" onclick="toggleWishlist(${p.id});renderWishlist()"> Remove</button>
+          <button class="remove-sm" onclick="toggleWishlist(${p.id});renderWishlist()">✕ Remove</button>
         </div>
       </div>
     </div>`).join("");
@@ -265,7 +264,7 @@ function closeOrdersModal(e) { if (e.target === document.getElementById("ordersO
 function renderOrderHistory() {
   const orders = getUserOrders(currentUser.email);
   const container = document.getElementById("ordersContent");
-  if (orders.length === 0) { container.innerHTML = '<p class="empty-msg">= No orders yet.<br>Place your first order today!</p>'; return; }
+  if (orders.length === 0) { container.innerHTML = '<p class="empty-msg">📭 No orders yet.<br>Place your first order today!</p>'; return; }
   container.innerHTML = orders.map(o => `
     <div class="order-card">
       <div class="order-card-header">
@@ -273,13 +272,13 @@ function renderOrderHistory() {
           <strong class="order-id">${o.orderId}</strong>
           <span class="order-date">${o.date}</span>
         </div>
-        <div class="order-total">x${o.total}</div>
+        <div class="order-total">₹${o.total}</div>
       </div>
       <div class="order-items-row">
         ${(o.items || []).map(i => `<span class="order-tag">${i.name} x${i.qty}</span>`).join("")}
       </div>
-      ${o.address ? `<div class="order-address">= ${o.address}</div>` : ""}
-      <div class="order-status-badge"> Order Placed</div>
+      ${o.address ? `<div class="order-address">📍 ${o.address}</div>` : ""}
+      <div class="order-status-badge">✅ Order Placed</div>
     </div>`).join("");
 }
 
@@ -298,15 +297,19 @@ function applyFilters() {
 
   let filtered = [...PRODUCTS];
 
-  if (search) filtered = filtered.filter(p =>
-    p.name.toLowerCase().includes(search) ||
-    (p.category || "").toLowerCase().includes(search) ||
-    (p.color || "").toLowerCase().includes(search) ||
-    p.size.toLowerCase().includes(search)
-  );
+  if (search) filtered = filtered.filter(p => {
+    const pSizes  = (p.sizes  || [p.size  || ""]).map(s => s.toLowerCase());
+    const pColors = (p.colors || [p.color || ""]).map(c => c.toLowerCase());
+    return (
+      p.name.toLowerCase().includes(search) ||
+      (p.category || "").toLowerCase().includes(search) ||
+      pColors.some(c => c.includes(search)) ||
+      pSizes.some(s => s.includes(search))
+    );
+  });
   if (cat)   filtered = filtered.filter(p => p.category === cat);
-  if (size)  filtered = filtered.filter(p => p.size === size);
-  if (color) filtered = filtered.filter(p => p.color === color);
+  if (size)  filtered = filtered.filter(p => (p.sizes  || [p.size  || ""]).includes(size));
+  if (color) filtered = filtered.filter(p => (p.colors || [p.color || ""]).includes(color));
   if (stock === "in_stock")  filtered = filtered.filter(p => p.stock > 3);
   else if (stock === "low_stock")  filtered = filtered.filter(p => p.stock > 0 && p.stock <= 3);
   else if (stock === "out_stock")  filtered = filtered.filter(p => p.stock === 0);
@@ -330,7 +333,7 @@ function clearFilters() {
 // RENDER PRODUCTS
 // =============================================
 function renderProducts(products) {
-  const prods    = products !== undefined ? products : (window.PRODUCTS||PRODUCTS);
+  const prods    = products !== undefined ? products : PRODUCTS;
   const grid     = document.getElementById("productsGrid");
   const wishlist = currentUser ? getUserWishlist(currentUser.email) : [];
 
@@ -338,8 +341,9 @@ function renderProducts(products) {
     "blue":"#4a90d9","red":"#d94a4a","yellow":"#f5c518","green":"#4caf50",
     "pink":"#e91e8c","orange":"#ff6600","purple":"#7c4dff","white":"#e0d6ce",
     "black":"#444","teal":"#009688","golden":"#d4a017","gold":"#d4a017",
-    "brown":"#795548","grey":"#9e9e9e","gray":"#9e9e9e","light pink":"#ffb6c1",
-    "sky blue":"#87ceeb","navy":"#1a237e","maroon":"#800000","cream":"#fffdd0"
+    "brown":"#795548","grey":"#9e9e9e","gray":"#9e9e9e",
+    "light pink":"#ffb6c1","sky blue":"#87ceeb","navy":"#1a237e",
+    "maroon":"#800000","cream":"#fffdd0","magenta":"#e91e63"
   };
 
   grid.innerHTML = prods.map(p => {
@@ -347,7 +351,17 @@ function renderProducts(products) {
     const stockText  = p.stock === 0 ? "Out of Stock" : p.stock <= 3 ? `Only ${p.stock} left` : "In Stock";
     const disabled   = p.stock === 0 ? "disabled" : "";
     const wished     = wishlist.includes(p.id);
-    const dot        = COLOR_DOT[(p.color||"").toLowerCase()] || "#ccc";
+    // Support both multi-value arrays (from sheet) and single-value strings (bundled)
+    const sizeArr  = p.sizes  || [p.size  || "M"];
+    const colorArr = p.colors || [p.color || "Red"];
+    const sizeTags = sizeArr.map(s =>
+      `<span class="tag tag-size">📏 ${s}</span>`
+    ).join("");
+    const colorTags = colorArr.map(c => {
+      const cKey = (c || "").toLowerCase();
+      const bg   = COLOR_DOT[cKey] || COLOR_DOT[cKey.split(" ")[0]] || "#ccc";
+      return `<span class="tag tag-color"><span class="color-dot" style="background:${bg}"></span>${c}</span>`;
+    }).join("");
     return `
       <div class="product-card" id="card-${p.id}">
         <div class="product-img-wrap">
@@ -358,8 +372,8 @@ function renderProducts(products) {
           <div class="product-name">${p.name}</div>
           <div class="product-tags">
             <span class="tag tag-cat">${p.category}</span>
-            <span class="tag tag-size">= ${p.size}</span>
-            <span class="tag tag-color"><span class="color-dot" style="background:${dot}"></span>${p.color}</span>
+            ${sizeTags}
+            ${colorTags}
           </div>
           <div class="product-bottom">
             <span class="product-price">&#8377;${p.price}</span>
@@ -382,7 +396,7 @@ function addToCart(id) {
   cart[id] = cart[id] ? { ...cart[id], qty: cart[id].qty + 1 } : { ...product, qty: 1 };
   if (currentUser) saveUserCart(currentUser.email, cart);
   updateCartUI();
-  showToast(" " + product.name + " added to cart");
+  showToast("✓ " + product.name + " added to cart");
 }
 
 function removeFromCart(id) {
@@ -535,73 +549,107 @@ function showToast(msg) {
 }
 
 // =============================================
-
-// =============================================
 // GOOGLE SHEET PRODUCT SYNC
 // =============================================
 function parseCSV(text) {
-  const lines = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").split("\n");
-  return lines.map(line=>{
-    const cells=[];let cell="",inQ=false;
-    for(const ch of line){
-      if(ch==='"'){inQ=!inQ;continue;}
-      if(ch===','&&!inQ){cells.push(cell.trim());cell="";continue;}
-      cell+=ch;
+  const lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+  return lines.map(line => {
+    const cells = []; let cell = "", inQ = false;
+    for (const ch of line) {
+      if (ch === '"') { inQ = !inQ; continue; }
+      if (ch === ',' && !inQ) { cells.push(cell.trim()); cell = ""; continue; }
+      cell += ch;
     }
-    cells.push(cell.trim());return cells;
-  }).filter(r=>r.join("").trim());
+    cells.push(cell.trim());
+    return cells;
+  }).filter(r => r.join("").trim());
 }
-function normColor(c){
-  if(!c)return"Red";const s=c.trim();
-  return s.charAt(0).toUpperCase()+s.slice(1).toLowerCase();
+
+function normColor(c) {
+  if (!c) return "Red";
+  const s = c.trim();
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 }
-async function loadProductsFromSheet(){
-  if(!SHEET_CSV_URL)return false;
-  try{
-    const resp=await fetch(SHEET_CSV_URL);
-    if(!resp.ok)throw new Error("HTTP "+resp.status);
-    const text=await resp.text();
-    const rows=parseCSV(text);
-    if(rows.length<2)return false;
-    const headers=rows[0].map(h=>h.toLowerCase().replace(/\s+/g,"_").trim());
-    const col=name=>headers.indexOf(name);
-    const nameCol=col("product_name")>=0?col("product_name"):col("name");
-    const idCol=col("product_id"),catCol=col("category"),priceCol=col("price");
-    const sizeCol=col("size")>=0?col("size"):col("sizes");
-    const colorCol=col("colors")>=0?col("colors"):col("color");
-    const stockCol=col("set_quantity")>=0?col("set_quantity"):col("stock"),imgCol=col("image_url")>=0?col("image_url"):col("image");
-    const loaded=rows.slice(1).filter(r=>nameCol>=0&&(r[nameCol]||"").trim()).map((row,i)=>{
-      const name=(row[nameCol]||"").trim();
-      const sizes=((row[sizeCol]||"M")+"").split(",").map(s=>s.trim()).filter(Boolean);
-      const cols=((row[colorCol]||"Red")+"").split(",").map(c=>normColor(c)).filter(Boolean);
-      const stock=parseInt(row[stockCol])||10;
-      const pid=idCol>=0?(parseInt(row[idCol])||i+1):(i+1);
-      const imgUrl=imgCol>=0?(row[imgCol]||"").trim():"";
-      const cat=catCol>=0?((row[catCol]||"Dress").trim()||"Dress"):"Dress";
-      return{id:pid,name,category:cat,price:parseInt(row[priceCol])||0,
-        size:sizes[0]||"M",color:cols[0]||"Red",stock,
-        image:imgUrl||("https://placehold.co/300x400/f5ede8/8B1A1A?text="+encodeURIComponent(name))};
-    });
-    if(loaded.length===0)return false;
-    window.PRODUCTS=loaded;
+
+async function loadProductsFromSheet() {
+  if (!SHEET_CSV_URL) return false;
+  try {
+    const resp = await fetch(SHEET_CSV_URL);
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const text = await resp.text();
+    const rows = parseCSV(text);
+    if (rows.length < 2) return false;
+
+    const headers = rows[0].map(h => h.toLowerCase().replace(/\s+/g, "_").trim());
+    const col = name => headers.indexOf(name);
+
+    const nameCol  = col("product_name") >= 0 ? col("product_name") : col("name");
+    const idCol    = col("product_id");
+    const catCol   = col("category");
+    const priceCol = col("price");
+    const sizeCol  = col("size") >= 0 ? col("size") : col("sizes");
+    const colorCol = col("colors") >= 0 ? col("colors") : col("color");
+    const stockCol = col("set_quantity") >= 0 ? col("set_quantity") : col("stock");
+    const imgCol   = col("image_url") >= 0 ? col("image_url") : col("image");
+
+    const loaded = rows.slice(1)
+      .filter(r => nameCol >= 0 && (r[nameCol] || "").trim())
+      .map((row, i) => {
+        const name   = (row[nameCol] || "").trim();
+        const sizes  = ((row[sizeCol] || "M") + "").split(",").map(s => s.trim()).filter(Boolean);
+        const cols   = ((row[colorCol] || "Red") + "").split(",").map(c => normColor(c)).filter(Boolean);
+        const stock  = parseInt(row[stockCol]) || 10;
+        const pid    = idCol >= 0 ? (parseInt(row[idCol]) || i + 1) : (i + 1);
+        const imgUrl = imgCol >= 0 ? (row[imgCol] || "").trim() : "";
+        const cat    = catCol >= 0 ? ((row[catCol] || "Dress").trim() || "Dress") : "Dress";
+        return {
+          id:       pid,
+          name,
+          category: cat,
+          price:    parseInt(row[priceCol]) || 0,
+          sizes:    sizes.length ? sizes : ["M"],
+          colors:   cols.length  ? cols  : ["Red"],
+          // keep singular for backward-compat (cart/wishlist display)
+          size:     sizes[0] || "M",
+          color:    cols[0]  || "Red",
+          stock,
+          image:    imgUrl || ("https://placehold.co/300x400/f5ede8/8B1A1A?text=" + encodeURIComponent(name))
+        };
+      });
+
+    if (loaded.length === 0) return false;
+    window.PRODUCTS = loaded;
     updateDynamicFilters();
     return true;
-  }catch(err){
-    console.warn("[Sheet sync failed, using bundled products]",err.message);
+  } catch (err) {
+    console.warn("[Sheet sync failed, using bundled products]", err.message);
     return false;
   }
 }
-function updateDynamicFilters(){
-  const cats=[...new Set(PRODUCTS.map(p=>p.category).filter(Boolean))];
-  const sizes=[...new Set(PRODUCTS.map(p=>p.size).filter(Boolean))];
-  const colors=[...new Set(PRODUCTS.map(p=>p.color).filter(Boolean))];
-  const catSel=document.getElementById("filterCategory");
-  if(catSel&&cats.length)catSel.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join("");
-  const sizeSel=document.getElementById("filterSize");
-  if(sizeSel&&sizes.length)sizeSel.innerHTML='<option value="">All Sizes</option>'+sizes.map(s=>`<option value="${s}">${s}</option>`).join("");
-  const colorSel=document.getElementById("filterColor");
-  if(colorSel&&colors.length)colorSel.innerHTML='<option value="">All Colors</option>'+colors.map(c=>`<option value="${c}">${c}</option>`).join("");
+
+function updateDynamicFilters() {
+  const cats   = [...new Set(PRODUCTS.map(p => p.category).filter(Boolean))];
+  // Flatten multi-value arrays (from sheet) or fall back to singular string (bundled)
+  const sizes  = [...new Set(PRODUCTS.flatMap(p => p.sizes  || [p.size  || "M"]).filter(Boolean))];
+  const colors = [...new Set(PRODUCTS.flatMap(p => p.colors || [p.color || "Red"]).filter(Boolean))];
+
+  const catSel = document.getElementById("filterCategory");
+  if (catSel && cats.length) {
+    catSel.innerHTML = '<option value="">&#127991;&#65039; All Categories</option>' +
+      cats.map(c => `<option value="${c}">${c}</option>`).join("");
+  }
+  const sizeSel = document.getElementById("filterSize");
+  if (sizeSel && sizes.length) {
+    sizeSel.innerHTML = '<option value="">&#128207; All Sizes</option>' +
+      sizes.map(s => `<option value="${s}">${s}</option>`).join("");
+  }
+  const colorSel = document.getElementById("filterColor");
+  if (colorSel && colors.length) {
+    colorSel.innerHTML = '<option value="">&#127912;&#65039; All Colors</option>' +
+      colors.map(c => `<option value="${c}">${c}</option>`).join("");
+  }
 }
+
 // =============================================
 // FILTER PANEL TOGGLE (mobile)
 // =============================================
@@ -614,13 +662,13 @@ function toggleFilterPanel() {
 }
 
 // =============================================
-// INITT
+// INIT
 // =============================================
 document.addEventListener("DOMContentLoaded", async () => {
   loadSession();
-  renderProducts();
+  renderProducts(); // show bundled products immediately
 
-  // Try to load live products from Google Sheet
+  // Try to load live products from Google Sheet in background
   if (SHEET_CSV_URL) {
     const loaded = await loadProductsFromSheet();
     if (loaded) renderProducts();
@@ -635,6 +683,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 });
-
-// Compatibility shim for older cached HTML versions
-window.toggleAuthDropdown = function() { openAuth('login'); };
