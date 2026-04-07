@@ -347,9 +347,9 @@ function renderProducts(products) {
   };
 
   grid.innerHTML = prods.map(p => {
-    const stockLabel = p.stock === 0 ? "out-of-stock" : p.stock <= 3 ? "low-stock" : "in-stock";
-    const stockText  = p.stock === 0 ? "Out of Stock" : p.stock <= 3 ? `Only ${p.stock} left` : "In Stock";
-    const disabled   = p.stock === 0 ? "disabled" : "";
+    const stockLabel = p.stock === 0 ? "out-of-stock" : "in-stock";
+      const stockText  = p.stock === 0 ? "Out of Stock" : "In Stock";
+      const disabled   = p.stock === 0 ? "disabled" : "";
     const wished     = wishlist.includes(p.id);
     // Support both multi-value arrays (from sheet) and single-value strings (bundled)
     const sizeArr  = p.sizes  || [p.size  || "M"];
@@ -483,7 +483,9 @@ async function submitOrder(e) {
   const items      = Object.values(cart);
   const total      = items.reduce((s, i) => s + i.price * i.qty, 0);
   const productsStr = items.map(i => `${i.name} x ${i.qty}`).join(", ");
-  const orderId    = "ORD-" + Date.now().toString().slice(-6);
+  const orderTimestamp = Date.now().toString();
+  const orderId    = orderTimestamp; // full timestamp — matches Google Sheet order_id column
+  const orderIdDisplay = "ORD-" + orderTimestamp.slice(-6); // friendly display for thank-you screen
 
   const orderData = {
     orderId,
@@ -515,7 +517,7 @@ async function submitOrder(e) {
       items.map(i => `<div class="ty-item"><span>${i.name} &times; ${i.qty}</span><span>&#8377;${i.price * i.qty}</span></div>`).join("") +
       `<div class="ty-item ty-total"><span>Total</span><span>&#8377;${total}</span></div></div>`;
 
-    document.getElementById("thankOrderId").textContent = orderId;
+    document.getElementById("thankOrderId").textContent = orderIdDisplay;
     document.getElementById("thankYouSummary").innerHTML = summaryHtml;
 
     // Clear cart
@@ -589,7 +591,8 @@ async function loadProductsFromSheet() {
     const priceCol = col("price");
     const sizeCol  = col("size") >= 0 ? col("size") : col("sizes");
     const colorCol = col("colors") >= 0 ? col("colors") : col("color");
-    const stockCol = col("set_quantity") >= 0 ? col("set_quantity") : col("stock");
+    const stockCol       = col("set_quantity") >= 0 ? col("set_quantity") : col("stock");
+    const stockStatusCol = col("stock_status");   // read stock_status column
     const imgCol   = col("image_url") >= 0 ? col("image_url") : col("image");
 
     const loaded = rows.slice(1)
@@ -598,8 +601,10 @@ async function loadProductsFromSheet() {
         const name   = (row[nameCol] || "").trim();
         const sizes  = ((row[sizeCol] || "M") + "").split(",").map(s => s.trim()).filter(Boolean);
         const cols   = ((row[colorCol] || "Red") + "").split(",").map(c => normColor(c)).filter(Boolean);
-        const stockRaw = row[stockCol];
-        const stock  = (stockRaw !== undefined && stockRaw !== "") ? (parseInt(stockRaw) || 0) : 10;
+        const stockRaw     = row[stockCol];
+        const stockStatus  = stockStatusCol >= 0 ? (row[stockStatusCol] || "").trim().toLowerCase() : "";
+        const isOutOfStock = stockStatus === "out_of_stock" || stockStatus === "out of stock";
+        const stock = isOutOfStock ? 0 : (stockRaw !== undefined && stockRaw !== "") ? (parseInt(stockRaw) || 0) : 10;
         const pid    = idCol >= 0 ? (parseInt(row[idCol]) || i + 1) : (i + 1);
         const imgUrl = imgCol >= 0 ? (row[imgCol] || "").trim() : "";
         const cat    = catCol >= 0 ? ((row[catCol] || "Dress").trim() || "Dress") : "Dress";
