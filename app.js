@@ -576,7 +576,8 @@ function normColor(c) {
 async function loadProductsFromSheet() {
   if (!SHEET_CSV_URL) return false;
   try {
-    const resp = await fetch(SHEET_CSV_URL);
+    const freshUrl = SHEET_CSV_URL + "&nocache=" + Date.now();
+    const resp = await fetch(freshUrl, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const text = await resp.text();
     const rows = parseCSV(text);
@@ -679,6 +680,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     const loaded = await loadProductsFromSheet();
     if (loaded) renderProducts();
   }
+
+  // Auto-refresh: reload from sheet when user returns to this tab
+  document.addEventListener("visibilitychange", async () => {
+    if (!document.hidden && SHEET_CSV_URL) {
+      const ok = await loadProductsFromSheet();
+      if (ok) renderProducts();
+    }
+  });
+
+  // Auto-refresh: reload every 5 minutes for real-time stock updates
+  setInterval(async () => {
+    if (!document.hidden && SHEET_CSV_URL) {
+      const ok = await loadProductsFromSheet();
+      if (ok) renderProducts();
+    }
+  }, 5 * 60 * 1000);
 
   // Close user dropdown when clicking outside
   document.addEventListener("click", (e) => {
