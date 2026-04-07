@@ -598,7 +598,8 @@ async function loadProductsFromSheet() {
         const name   = (row[nameCol] || "").trim();
         const sizes  = ((row[sizeCol] || "M") + "").split(",").map(s => s.trim()).filter(Boolean);
         const cols   = ((row[colorCol] || "Red") + "").split(",").map(c => normColor(c)).filter(Boolean);
-        const stock  = parseInt(row[stockCol]) || 10;
+        const stockRaw = row[stockCol];
+        const stock  = (stockRaw !== undefined && stockRaw !== "") ? (parseInt(stockRaw) || 0) : 10;
         const pid    = idCol >= 0 ? (parseInt(row[idCol]) || i + 1) : (i + 1);
         const imgUrl = imgCol >= 0 ? (row[imgCol] || "").trim() : "";
         const cat    = catCol >= 0 ? ((row[catCol] || "Dress").trim() || "Dress") : "Dress";
