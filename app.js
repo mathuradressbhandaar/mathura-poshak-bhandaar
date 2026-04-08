@@ -488,7 +488,7 @@ async function submitOrder(e) {
   const orderIdDisplay = "ORD-" + orderTimestamp.slice(-6); // friendly display for thank-you screen
 
   const orderData = {
-    orderId,
+    orderId: orderIdDisplay,
     name:     document.getElementById("custName").value.trim(),
     phone:    document.getElementById("custPhone").value.trim(),
     email:    document.getElementById("custEmail").value.trim(),
