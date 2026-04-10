@@ -88,8 +88,12 @@ function openAuth(tab) {
 function closeAuth() {
   document.getElementById("authOverlay").classList.remove("open");
   // clear inputs
-  ["loginEmail","loginPassword","regFirstName","regLastName","regEmail","regPhone","regPassword","regConfirmPassword"]
+  ["loginEmail","loginPassword","regFirstName","regLastName","regEmail","regPhone","regPassword","regConfirmPassword","forgotEmail","newPassword","confirmNewPassword"]
     .forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+  const s1 = document.getElementById("forgotStep1");
+  const s2 = document.getElementById("forgotStep2");
+  if (s1) s1.style.display = "block";
+  if (s2) s2.style.display = "none";
 }
 
 function closeAuthModal(e) {
@@ -99,6 +103,7 @@ function closeAuthModal(e) {
 function switchTab(tab) {
   document.getElementById("loginForm").style.display   = tab === "login"    ? "block" : "none";
   document.getElementById("registerForm").style.display = tab === "register" ? "block" : "none";
+  document.getElementById("forgotForm").style.display  = tab === "forgot"   ? "block" : "none";
   document.getElementById("loginTab").classList.toggle("active",    tab === "login");
   document.getElementById("registerTab").classList.toggle("active", tab === "register");
 }
@@ -203,6 +208,38 @@ function togglePwd(inputId, btn) {
   if (!input) return;
   if (input.type === "password") { input.type = "text";     btn.textContent = "🙈"; }
   else                           { input.type = "password"; btn.textContent = "👁";  }
+}
+
+
+// =============================================
+// AUTH – FORGOT / RESET PASSWORD
+// =============================================
+function doForgotPassword() {
+  const email = (document.getElementById("forgotEmail").value || "").trim().toLowerCase();
+  if (!email) { showToast("Please enter your email address"); return; }
+  const user = getUsers().find(u => u.email === email);
+  if (!user) { showToast("❌ No account found with this email"); return; }
+  window._resetEmail = email;
+  document.getElementById("forgotStep1").style.display = "none";
+  document.getElementById("forgotStep2").style.display = "block";
+}
+
+function doResetPassword() {
+  const newPwd = document.getElementById("newPassword").value || "";
+  const confirmPwd = document.getElementById("confirmNewPassword").value || "";
+  if (!newPwd || !confirmPwd) { showToast("Please fill all fields"); return; }
+  if (newPwd.length < 6) { showToast("Password must be at least 6 characters"); return; }
+  if (newPwd !== confirmPwd) { showToast("Passwords do not match"); return; }
+  const users = getUsers();
+  const idx = users.findIndex(u => u.email === window._resetEmail);
+  if (idx === -1) { showToast("Something went wrong. Please try again."); return; }
+  users[idx].password = newPwd;
+  if (currentUser && currentUser.email === window._resetEmail) currentUser.password = newPwd;
+  saveUsers(users);
+  window._resetEmail = null;
+  showToast("✅ Password reset! Please login with your new password.");
+  closeAuth();
+  openAuth("login");
 }
 
 // =============================================
