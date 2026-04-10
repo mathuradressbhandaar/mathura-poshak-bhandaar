@@ -232,6 +232,7 @@
             </div>
           </div>
           <button class="submit-btn" onclick="doLogin()">Login →</button>
+          <p class="forgot-pwd-link"><a onclick="switchTab('forgot')">Forgot password?</a></p>
           <p class="auth-switch">Don't have an account? <a onclick="switchTab('register')">Register here</a></p>
         </div>
       </div>
@@ -278,6 +279,40 @@
           </div>
           <button class="submit-btn" onclick="doRegister()">Create Account →</button>
           <p class="auth-switch">Already have an account? <a onclick="switchTab('login')">Login here</a></p>
+        </div>
+      </div>
+      <!-- FORGOT PASSWORD FORM -->
+      <div id="forgotForm" class="auth-form" style="display:none">
+        <div class="auth-form-header">
+          <div class="auth-icon">🔑</div>
+          <h3>Reset Password</h3>
+          <p>Enter your registered email to set a new password</p>
+        </div>
+        <div class="auth-body" id="forgotStep1">
+          <div class="form-group">
+            <label>Registered Email *</label>
+            <input type="email" id="forgotEmail" placeholder="your@email.com" />
+          </div>
+          <button class="submit-btn" onclick="doForgotPassword()">Find My Account →</button>
+          <p class="auth-switch">Remembered it? <a onclick="switchTab('login')">Back to Login</a></p>
+        </div>
+        <div class="auth-body" id="forgotStep2" style="display:none">
+          <div class="form-group">
+            <label>New Password *</label>
+            <div class="pwd-wrap">
+              <input type="password" id="newPassword" placeholder="Minimum 6 characters" />
+              <button type="button" class="pwd-toggle" onclick="togglePwd('newPassword', this)">👁</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password *</label>
+            <div class="pwd-wrap">
+              <input type="password" id="confirmNewPassword" placeholder="Re-enter new password" />
+              <button type="button" class="pwd-toggle" onclick="togglePwd('confirmNewPassword', this)">👁</button>
+            </div>
+          </div>
+          <button class="submit-btn" onclick="doResetPassword()">Reset Password →</button>
+          <p class="auth-switch"><a onclick="switchTab('login')">← Back to Login</a></p>
         </div>
       </div>
     </div>
@@ -329,6 +364,6 @@
   </footer>
 
   <script src="products.js?v=3"></script>
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>
