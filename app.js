@@ -164,6 +164,7 @@ function doRegister() {
   const newUser = { firstName, lastName, email, phone, password };
   users.push(newUser);
   saveUsers(users);
+  try { fetch(ORDERS_API_URL + "?action=register&data=" + encodeURIComponent(JSON.stringify({ firstName, lastName, email, phone })), { method: "GET", mode: "no-cors" }); } catch(e) {}
 
   currentUser = newUser;
   localStorage.setItem("mpb_session", email);
