@@ -111,22 +111,41 @@ function switchTab(tab) {
 // =============================================
 // AUTH – LOGIN
 // =============================================
-function doLogin() {
-  const email    = (document.getElementById("loginEmail").value || "").trim().toLowerCase();
-  const password = (document.getElementById("loginPassword").value || "");
-  if (!email || !password) { showToast("Please enter email and password"); return; }
-
-  const user = getUsers().find(u => u.email === email && u.password === password);
-  if (!user) { showToast("❌ Invalid email or password"); return; }
-
-  currentUser = user;
-  localStorage.setItem("mpb_session", email);
-  cart = getUserCart(email);
-  updateCartUI();
-  updateAuthBtn();
-  closeAuth();
-  renderProducts();
-  showToast("Welcome back, " + user.firstName + "! 🎉");
+async function doLogin() {
+     const email = (document.getElementById("loginEmail").value || "").trim().toLowerCase();
+     const password = (document.getElementById("loginPassword").value || "");
+     if (!email || !password) { showToast("Please enter email and password"); return; }
+     const localUser = getUsers().find(u => u.email === email && u.password === password);
+     if (localUser) {
+            currentUser = localUser;
+            localStorage.setItem("mpb_session", email);
+            cart = getUserCart(email);
+            updateCartUI(); updateAuthBtn(); closeAuth(); renderProducts();
+            showToast("Welcome back, " + localUser.firstName + "! 🎉");
+            return;
+     }
+     const btn = document.querySelector("#loginForm .submit-btn");
+     if (btn) { btn.disabled = true; btn.textContent = "Verifying..."; }
+     try {
+            const resp = await fetch(ORDERS_API_URL + "?action=login&data=" + encodeURIComponent(JSON.stringify({ email, password })));
+            const result = await resp.json();
+            if (result.status === 'success') {
+                     const user = result.user;
+                     const users = getUsers();
+                     if (!users.find(u => u.email === email)) { users.push(user); saveUsers(users); }
+                     currentUser = user;
+                     localStorage.setItem("mpb_session", email);
+                     cart = getUserCart(email);
+                     updateCartUI(); updateAuthBtn(); closeAuth(); renderProducts();
+                     showToast("Welcome back, " + user.firstName + "! 🎉");
+            } else {
+                     showToast("❌ Invalid email or password. If you registered earlier, please re-register.");
+            }
+     } catch(e) {
+            showToast("❌ Invalid email or password");
+     } finally {
+            if (btn) { btn.disabled = false; btn.textContent = "Login →"; }
+     }
 }
 
 // =============================================
@@ -164,7 +183,7 @@ function doRegister() {
   const newUser = { firstName, lastName, email, phone, password };
   users.push(newUser);
   saveUsers(users);
-  try { fetch(ORDERS_API_URL + "?action=register&data=" + encodeURIComponent(JSON.stringify({ firstName, lastName, email, phone })), { method: "GET", mode: "no-cors" }); } catch(e) {}
+  try { fetch(ORDERS_API_URL + "?action=register&data=" + encodeURIComponent(JSON.stringify({ firstName, lastName, email, phone, password })), { method: "GET", mode: "no-cors" }); } catch(e) {}
 
   currentUser = newUser;
   localStorage.setItem("mpb_session", email);
