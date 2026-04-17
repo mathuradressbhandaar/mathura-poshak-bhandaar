@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mathuradressbhandaar.github.io/mathura-poshak-bhandaar/sitemap.xml
