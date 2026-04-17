@@ -6,364 +6,794 @@
   <title>Mathura Poshak Bhandaar – Wholesale Dress Store</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=4" />
+
+  <!-- ACCOUNT PAGE STYLES -->
+  <style>
+    /* ── Account Page Overlay ── */
+    .account-overlay {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .account-overlay.open { opacity: 1; pointer-events: all; }
+
+    .account-page {
+      display: flex;
+      width: min(960px, 96vw);
+      height: min(640px, 92vh);
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,.22);
+      position: relative;
+    }
+
+    /* ── Sidebar ── */
+    .acc-sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: #3d0c0c;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 0 20px;
+      overflow-y: auto;
+    }
+    .acc-user-block {
+      text-align: center;
+      padding: 0 16px 24px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .acc-avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: #c0392b;
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 10px;
+      letter-spacing: 1px;
+    }
+    .acc-user-name {
+      color: #fff;
+      font-weight: 600;
+      font-size: .95rem;
+      margin-bottom: 2px;
+    }
+    .acc-user-email {
+      color: rgba(255,255,255,.55);
+      font-size: .72rem;
+      word-break: break-all;
+    }
+
+    /* ── Nav ── */
+    .acc-nav { padding: 14px 0; flex: 1; }
+    .acc-nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 11px 20px;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,.75);
+      font-size: .85rem;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      transition: background .18s, color .18s;
+    }
+    .acc-nav-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+    .acc-nav-btn.active { background: rgba(255,255,255,.15); color: #fff; font-weight: 600;
+      border-right: 3px solid #e74c3c; }
+    .acc-nav-btn .nav-icon { font-size: 1.05rem; width: 20px; text-align: center; }
+
+    .acc-logout-btn {
+      margin: 8px 16px 0;
+      padding: 9px 14px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 8px;
+      color: rgba(255,255,255,.7);
+      font-size: .83rem;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: center;
+      transition: background .18s;
+    }
+    .acc-logout-btn:hover { background: rgba(231,76,60,.4); color: #fff; }
+
+    /* ── Content Area ── */
+    .account-content {
+      flex: 1;
+      overflow-y: auto;
+      background: #faf7f5;
+    }
+    .acc-section-header {
+      background: #fff;
+      padding: 22px 28px 16px;
+      border-bottom: 1px solid #ede8e3;
+    }
+    .acc-section-header h2 {
+      margin: 0;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      color: #3d0c0c;
+    }
+    .acc-section-body { padding: 24px 28px; }
+
+    /* ── Close ── */
+    .acc-close-btn {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: rgba(0,0,0,.07);
+      border: none;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #555;
+      transition: background .18s;
+      z-index: 10;
+    }
+    .acc-close-btn:hover { background: rgba(0,0,0,.15); }
+
+    /* ── Profile Section ── */
+    .profile-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      gap: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    }
+    .profile-avatar-lg {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #8B1A1A, #c0392b);
+      color: #fff;
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      letter-spacing: 1px;
+    }
+    .profile-fields { flex: 1; }
+    .profile-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .profile-field { margin-bottom: 14px; }
+    .profile-field label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .profile-field input, .profile-field textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid #e0d6d0;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: .9rem;
+      color: #333;
+      background: #faf7f5;
+      box-sizing: border-box;
+      transition: border-color .18s;
+    }
+    .profile-field input:focus, .profile-field textarea:focus {
+      outline: none;
+      border-color: #8B1A1A;
+    }
+    .field-note { font-size: .72rem; color: #999; margin-top: 4px; display: block; }
+
+    .acc-save-btn {
+      padding: 10px 22px;
+      background: #8B1A1A;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .18s;
+      margin-top: 4px;
+    }
+    .acc-save-btn:hover { background: #6b1212; }
+
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+    .stat-num { font-size: 1.8rem; font-weight: 700; color: #8B1A1A; }
+    .stat-label { font-size: .78rem; color: #888; margin-top: 4px; }
+
+    /* ── Wishlist in Account ── */
+    .acc-wishlist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 14px;
+    }
+    .acc-wish-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    }
+    .acc-wish-card img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+    }
+    .acc-wish-info { padding: 10px; }
+    .acc-wish-name { font-size: .82rem; font-weight: 600; color: #333; margin-bottom: 3px; }
+    .acc-wish-meta { font-size: .72rem; color: #888; margin-bottom: 5px; }
+    .acc-wish-price { font-size: .9rem; font-weight: 700; color: #8B1A1A; margin-bottom: 8px; }
+    .acc-wish-actions { display: flex; gap: 6px; }
+    .acc-add-cart {
+      flex: 1;
+      padding: 6px 4px;
+      background: #8B1A1A;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: .72rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .acc-add-cart:disabled { background: #ccc; cursor: not-allowed; }
+    .acc-remove-wish {
+      padding: 6px 8px;
+      background: #f8f0ee;
+      border: 1px solid #e0d6d0;
+      border-radius: 6px;
+      font-size: .72rem;
+      cursor: pointer;
+      color: #999;
+    }
+
+    /* ── Orders in Account ── */
+    .acc-order-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+    .acc-order-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .acc-order-head strong { font-size: .9rem; color: #333; display: block; }
+    .acc-order-date { font-size: .75rem; color: #999; }
+    .acc-order-total { font-weight: 700; color: #8B1A1A; font-size: .95rem; }
+    .acc-order-items { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .acc-order-tag {
+      background: #f5ede8;
+      color: #8B1A1A;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: .75rem;
+    }
+    .acc-order-addr { font-size: .78rem; color: #666; margin-bottom: 8px; }
+    .acc-order-status {
+      font-size: .78rem;
+      color: #27ae60;
+      font-weight: 600;
+    }
+
+    /* ── Address ── */
+    .acc-addr-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .acc-addr-label { font-size: .78rem; font-weight: 700; color: #8B1A1A; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+    .acc-addr-text { font-size: .85rem; color: #555; line-height: 1.5; }
+    .acc-addr-del {
+      padding: 6px 12px;
+      background: #fff0f0;
+      border: 1px solid #f5c0c0;
+      border-radius: 7px;
+      color: #c0392b;
+      font-size: .75rem;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .acc-addr-del:hover { background: #ffe0e0; }
+    .acc-add-addr-form {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+    .acc-add-addr-form h3 { font-size: 1rem; color: #3d0c0c; margin: 0 0 16px; }
+
+    /* ── Change Password ── */
+    .acc-form-box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 28px;
+      max-width: 460px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    }
+    .acc-pwd-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f0f8f0;
+      border: 1px solid #c8e6c9;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      font-size: .82rem;
+      color: #2d6a2d;
+    }
+    .acc-pwd-info span { font-size: 1.2rem; }
+    .acc-pwd-info p { margin: 0; }
+
+    /* ── Help ── */
+    .acc-help-contact {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .help-contact-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+    .help-contact-card > span { font-size: 1.5rem; }
+    .help-contact-label { font-size: .72rem; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .help-contact-card a { color: #8B1A1A; font-weight: 600; font-size: .88rem; text-decoration: none; }
+    .help-contact-card a:hover { text-decoration: underline; }
+
+    .acc-faq h3 { font-size: 1.05rem; color: #3d0c0c; margin: 0 0 16px; }
+    .faq-item {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.05);
+      overflow: hidden;
+    }
+    .faq-item summary {
+      padding: 14px 18px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: .88rem;
+      color: #3d0c0c;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .faq-item summary::after { content: "＋"; font-size: 1rem; color: #8B1A1A; }
+    .faq-item[open] summary::after { content: "－"; }
+    .faq-item p { padding: 0 18px 16px; margin: 0; font-size: .84rem; color: #555; line-height: 1.7; }
+
+    /* ── Empty State ── */
+    .acc-empty-state {
+      text-align: center;
+      padding: 50px 20px;
+      color: #bbb;
+    }
+    .acc-empty-state > :first-child { font-size: 3rem; display: block; margin-bottom: 12px; }
+    .acc-empty-state p { font-size: 1rem; color: #888; margin: 0 0 6px; font-weight: 600; }
+    .acc-empty-state span { font-size: .82rem; }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+      .account-page { flex-direction: column; height: 96vh; border-radius: 14px; }
+      .acc-sidebar {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0;
+        min-height: 0;
+      }
+      .acc-user-block { display: none; }
+      .acc-nav { display: flex; flex-direction: row; padding: 0; white-space: nowrap; flex: 1; }
+      .acc-nav-btn { padding: 12px 14px; border-right: none; font-size: .78rem; flex-direction: column; gap: 4px; }
+      .acc-nav-btn.active { border-right: none; border-bottom: 3px solid #e74c3c; }
+      .acc-logout-btn { display: none; }
+      .profile-card { flex-direction: column; align-items: center; }
+      .profile-field-row { grid-template-columns: 1fr; }
+      .acc-section-body { padding: 16px; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header>
-    <div class="header-inner">
-      <div class="logo">
-        <span class="logo-icon">🪷</span>
-        <div>
-          <div class="logo-title">Mathura Poshak Bhandaar</div>
-          <div class="logo-sub">Wholesale Dress Store</div>
-        </div>
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">🪷</span>
+      <div>
+        <div class="logo-title">Mathura Poshak Bhandaar</div>
+        <div class="logo-sub">Wholesale Dress Store</div>
       </div>
-      <div class="header-actions">
-        <a class="whatsapp-btn" href="https://wa.me/919760096109?text=Hi%2C%20I%20want%20to%20place%20an%20order" target="_blank">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          WhatsApp Order
-        </a>
+    </div>
+    <div class="header-actions">
+      <a class="whatsapp-btn" href="https://wa.me/919760096109?text=Hi%2C%20I%20want%20to%20place%20an%20order" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp Order
+      </a>
 
-        <!-- AUTH BUTTON + DROPDOWN -->
-        <div class="auth-wrap">
-          <button class="auth-btn" id="authBtn" onclick="openAuth('login')">
-            👤 <span id="authBtnText">Login</span>
-          </button>
-          <!-- User dropdown (shown when logged in) -->
-          <div class="user-dropdown" id="userDropdown">
-            <div class="user-dropdown-name" id="userDropdownName"></div>
-            <button onclick="openWishlist()">❤️ My Wishlist <span id="wishlistCountBadge" class="badge"></span></button>
-            <button onclick="openOrderHistory()">📦 Order History</button>
-            <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
-          </div>
-        </div>
-
-        <button class="cart-btn" onclick="toggleCart()">
-          🛒 Cart <span class="cart-count" id="cartCount">0</span>
+      <!-- AUTH BUTTON + DROPDOWN -->
+      <div class="auth-wrap">
+        <button class="auth-btn" id="authBtn" onclick="openAuth('login')">
+          👤 <span id="authBtnText">Login</span>
         </button>
+        <!-- User dropdown (shown when logged in) -->
+        <div class="user-dropdown" id="userDropdown">
+          <div class="user-dropdown-name" id="userDropdownName"></div>
+          <button onclick="openAccount()">🏠 My Account</button>
+          <button onclick="openWishlist()">❤️ My Wishlist <span id="wishlistCountBadge" class="badge"></span></button>
+          <button onclick="openOrderHistory()">📦 Order History</button>
+          <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+        </div>
       </div>
-    </div>
-  </header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1>Premium Wholesale Dresses</h1>
-      <p>Authentic Indian fashion at wholesale prices. Bulk orders welcome.</p>
-      <a href="#products" class="hero-cta">Shop Now</a>
-    </div>
-  </section>
-
-  <!-- SEARCH & FILTER BAR -->
-  <div class="search-filter-bar">
-    <div class="search-filter-inner">
-      <!-- Row 1: Search -->
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Search by name, color, size..." oninput="applyFilters()" />
-      </div>
-      <!-- Mobile filter toggle button -->
-      <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
-        <span class="filter-icon">&#9776;</span> Filters &amp; Sort
+      <button class="cart-btn" onclick="toggleCart()">
+        🛒 Cart <span class="cart-count" id="cartCount">0</span>
       </button>
-      <!-- Row 2 & 3: Dropdowns + Price Range (collapsible on mobile) -->
-      <div id="filterPanel">
-        <div class="filter-row">
-          <select id="filterCategory" onchange="applyFilters()">
-            <option value="">🏷️ All Categories</option>
-            <option value="Poshak">Poshak</option>
-            <option value="Dress">Dress</option>
-            <option value="Set">Set</option>
-          </select>
-          <select id="filterSize" onchange="applyFilters()">
-            <option value="">📏 All Sizes</option>
-            <option value="S">S</option>
-            <option value="M">M</option>
-            <option value="L">L</option>
-            <option value="XL">XL</option>
-          </select>
-          <select id="filterColor" onchange="applyFilters()">
-            <option value="">🎨 All Colors</option>
-            <option value="Blue">Blue</option>
-            <option value="Red">Red</option>
-            <option value="Yellow">Yellow</option>
-            <option value="Green">Green</option>
-            <option value="Pink">Pink</option>
-            <option value="Orange">Orange</option>
-            <option value="Purple">Purple</option>
-            <option value="White">White</option>
-          </select>
-          <select id="filterStock" onchange="applyFilters()">
-            <option value="">📦 All Stock</option>
-            <option value="in_stock">In Stock</option>
-            <option value="low_stock">Low Stock</option>
-            <option value="out_stock">Out of Stock</option>
-          </select>
-          <select id="sortPrice" onchange="applyFilters()">
-            <option value="">&#8679; Sort by Price</option>
-            <option value="low_high">Price: Low → High</option>
-            <option value="high_low">Price: High → Low</option>
-          </select>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Premium Wholesale Dresses</h1>
+    <p>Authentic Indian fashion at wholesale prices. Bulk orders welcome.</p>
+    <a href="#products" class="hero-cta">Shop Now</a>
+  </div>
+</section>
+
+<!-- SEARCH & FILTER BAR -->
+<div class="search-filter-bar">
+  <div class="search-filter-inner">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search by name, color, size..." oninput="applyFilters()" />
+    </div>
+    <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
+      <span class="filter-icon">&#9776;</span> Filters &amp; Sort
+    </button>
+    <div id="filterPanel">
+      <div class="filter-row">
+        <select id="filterCategory" onchange="applyFilters()">
+          <option value="">🏷️ All Categories</option>
+          <option value="Poshak">Poshak</option>
+          <option value="Dress">Dress</option>
+          <option value="Set">Set</option>
+        </select>
+        <select id="filterSize" onchange="applyFilters()">
+          <option value="">📏 All Sizes</option>
+          <option value="S">S</option>
+          <option value="M">M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+        </select>
+        <select id="filterColor" onchange="applyFilters()">
+          <option value="">🎨 All Colors</option>
+          <option value="Blue">Blue</option>
+          <option value="Red">Red</option>
+          <option value="Yellow">Yellow</option>
+          <option value="Green">Green</option>
+          <option value="Pink">Pink</option>
+          <option value="Orange">Orange</option>
+          <option value="Purple">Purple</option>
+          <option value="White">White</option>
+        </select>
+        <select id="filterStock" onchange="applyFilters()">
+          <option value="">📦 All Stock</option>
+          <option value="in_stock">In Stock</option>
+          <option value="low_stock">Low Stock</option>
+          <option value="out_stock">Out of Stock</option>
+        </select>
+        <select id="sortPrice" onchange="applyFilters()">
+          <option value="">&#8679; Sort by Price</option>
+          <option value="low_high">Price: Low → High</option>
+          <option value="high_low">Price: High → Low</option>
+        </select>
+      </div>
+      <div class="price-range-row">
+        <span class="price-range-label">&#8377; Price Range:</span>
+        <div class="price-inputs">
+          <input type="number" id="priceMinInput" placeholder="Min" min="0" oninput="applyFilters()" />
+          <span class="price-dash">—</span>
+          <input type="number" id="priceMaxInput" placeholder="Max" min="0" oninput="applyFilters()" />
         </div>
-        <div class="price-range-row">
-          <span class="price-range-label">&#8377; Price Range:</span>
-          <div class="price-inputs">
-            <input type="number" id="priceMinInput" placeholder="Min" min="0" oninput="applyFilters()" />
-            <span class="price-dash">—</span>
-            <input type="number" id="priceMaxInput" placeholder="Max" min="0" oninput="applyFilters()" />
-          </div>
-          <button class="clear-filters-btn" onclick="clearFilters()">&#10005; Clear All</button>
-        </div>
+        <button class="clear-filters-btn" onclick="clearFilters()">&#10005; Clear All</button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- PRODUCTS -->
-  <section id="products" class="products-section">
-    <div class="section-header">
-      <h2>Our Collection</h2>
-      <p>All sizes available • Bulk discount on orders above ₹2000</p>
-    </div>
-    <div class="no-results" id="noResults" style="display:none">No products found. Try a different search or filter.</div>
-    <div class="products-grid" id="productsGrid"></div>
-  </section>
+<!-- PRODUCTS -->
+<section id="products" class="products-section">
+  <div class="section-header">
+    <h2>Our Collection</h2>
+    <p>All sizes available • Bulk discount on orders above ₹2000</p>
+  </div>
+  <div class="no-results" id="noResults" style="display:none">No products found. Try a different search or filter.</div>
+  <div class="products-grid" id="productsGrid"></div>
+</section>
 
-  <!-- CART SIDEBAR -->
-  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
-  <div class="cart-sidebar" id="cartSidebar">
-    <div class="cart-header">
-      <h2>Your Cart</h2>
-      <button onclick="toggleCart()" class="close-cart">✕</button>
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h2>Your Cart</h2>
+    <button onclick="toggleCart()" class="close-cart">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <p class="empty-cart">Your cart is empty</p>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total">Total: <strong id="cartTotal">₹0</strong></div>
+    <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout</button>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Complete Your Order</h3>
+      <button onclick="closeCheckout()" class="close-btn">✕</button>
     </div>
-    <div class="cart-items" id="cartItems">
-      <p class="empty-cart">Your cart is empty</p>
+    <div class="order-summary" id="orderSummary"></div>
+    <form id="orderForm" onsubmit="submitOrder(event)">
+      <div class="form-group"><label>Full Name *</label><input type="text" id="custName" placeholder="Your full name" required /></div>
+      <div class="form-group"><label>Phone Number *</label><input type="tel" id="custPhone" placeholder="10-digit mobile number" required pattern="[0-9]{10}" /></div>
+      <div class="form-group"><label>Email</label><input type="email" id="custEmail" placeholder="your@email.com" /></div>
+      <div class="form-group"><label>Delivery Address *</label><textarea id="custAddress" placeholder="Full address with PIN code" required rows="3"></textarea></div>
+      <div class="form-group"><label>Remarks / Special Instructions</label><textarea id="custRemarks" placeholder="Any special requests, size notes, etc." rows="2"></textarea></div>
+      <button type="submit" class="submit-btn" id="submitBtn">Place Order</button>
+    </form>
+  </div>
+</div>
+
+<!-- THANK YOU MODAL -->
+<div class="overlay" id="thankYouOverlay">
+  <div class="modal thankyou-modal">
+    <div class="thankyou-header">
+      <div class="thankyou-icon">✅</div>
+      <h2>Order Placed Successfully!</h2>
+      <p class="thankyou-subtitle">Thank you! We will contact you shortly to confirm your order.</p>
     </div>
-    <div class="cart-footer" id="cartFooter" style="display:none">
-      <div class="cart-total">
-        Total: <strong id="cartTotal">₹0</strong>
-      </div>
-      <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout</button>
+    <div class="thankyou-body">
+      <div class="order-id-box"><span>Your Order ID</span><strong id="thankOrderId"></strong></div>
+      <div class="thankyou-summary" id="thankYouSummary"></div>
+    </div>
+    <div class="thankyou-footer">
+      <button class="continue-btn" onclick="closeThankYou()">Continue Shopping</button>
     </div>
   </div>
+</div>
 
-  <!-- CHECKOUT MODAL -->
-  <div class="overlay" id="modalOverlay" onclick="closeModal(event)">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Complete Your Order</h3>
-        <button onclick="closeCheckout()" class="close-btn">✕</button>
+<!-- AUTH MODAL (Login / Register) -->
+<div class="overlay" id="authOverlay" onclick="closeAuthModal(event)">
+  <div class="modal auth-modal">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="loginTab" onclick="switchTab('login')">Login</button>
+      <button class="auth-tab" id="registerTab" onclick="switchTab('register')">Register</button>
+      <button class="close-btn auth-close" onclick="closeAuth()">✕</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm" class="auth-form">
+      <div class="auth-form-header">
+        <div class="auth-icon">🔐</div>
+        <h3>Welcome Back</h3>
+        <p>Login to access your cart, orders &amp; wishlist</p>
       </div>
-      <div class="order-summary" id="orderSummary"></div>
-      <form id="orderForm" onsubmit="submitOrder(event)">
+      <div class="auth-body">
+        <div class="form-group"><label>Email Address *</label><input type="email" id="loginEmail" placeholder="your@email.com" /></div>
         <div class="form-group">
-          <label>Full Name *</label>
-          <input type="text" id="custName" placeholder="Your full name" required />
+          <label>Password *</label>
+          <div class="pwd-wrap">
+            <input type="password" id="loginPassword" placeholder="Enter your password" />
+            <button type="button" class="pwd-toggle" onclick="togglePwd('loginPassword', this)">👁</button>
+          </div>
+        </div>
+        <button class="submit-btn" onclick="doLogin()">Login →</button>
+        <p class="forgot-pwd-link"><a onclick="switchTab('forgot')">Forgot password?</a></p>
+        <p class="auth-switch">Don't have an account? <a onclick="switchTab('register')">Register here</a></p>
+      </div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm" class="auth-form" style="display:none">
+      <div class="auth-form-header">
+        <div class="auth-icon">✨</div>
+        <h3>Create Account</h3>
+        <p>Join us to enjoy a personalised shopping experience</p>
+      </div>
+      <div class="auth-body">
+        <div class="form-row-2">
+          <div class="form-group"><label>First Name *</label><input type="text" id="regFirstName" placeholder="First name" /></div>
+          <div class="form-group"><label>Last Name *</label><input type="text" id="regLastName" placeholder="Last name" /></div>
+        </div>
+        <div class="form-group"><label>Email Address *</label><input type="email" id="regEmail" placeholder="your@email.com" /></div>
+        <div class="form-group"><label>Phone Number *</label><input type="tel" id="regPhone" placeholder="10-digit mobile number" maxlength="10" /></div>
+        <div class="form-group">
+          <label>Password *</label>
+          <div class="pwd-wrap">
+            <input type="password" id="regPassword" placeholder="Minimum 6 characters" />
+            <button type="button" class="pwd-toggle" onclick="togglePwd('regPassword', this)">👁</button>
+          </div>
         </div>
         <div class="form-group">
-          <label>Phone Number *</label>
-          <input type="tel" id="custPhone" placeholder="10-digit mobile number" required pattern="[0-9]{10}" />
+          <label>Confirm Password *</label>
+          <div class="pwd-wrap">
+            <input type="password" id="regConfirmPassword" placeholder="Re-enter password" />
+            <button type="button" class="pwd-toggle" onclick="togglePwd('regConfirmPassword', this)">👁</button>
+          </div>
+        </div>
+        <button class="submit-btn" onclick="doRegister()">Create Account →</button>
+        <p class="auth-switch">Already have an account? <a onclick="switchTab('login')">Login here</a></p>
+      </div>
+    </div>
+
+    <!-- FORGOT PASSWORD FORM -->
+    <div id="forgotForm" class="auth-form" style="display:none">
+      <div class="auth-form-header">
+        <div class="auth-icon">🔑</div>
+        <h3>Reset Password</h3>
+        <p>Enter your registered email to set a new password</p>
+      </div>
+      <div class="auth-body" id="forgotStep1">
+        <div class="form-group"><label>Registered Email *</label><input type="email" id="forgotEmail" placeholder="your@email.com" /></div>
+        <button class="submit-btn" onclick="doForgotPassword()">Find My Account →</button>
+        <p class="auth-switch">Remembered it? <a onclick="switchTab('login')">Back to Login</a></p>
+      </div>
+      <div class="auth-body" id="forgotStep2" style="display:none">
+        <div class="form-group">
+          <label>New Password *</label>
+          <div class="pwd-wrap">
+            <input type="password" id="newPassword" placeholder="Minimum 6 characters" />
+            <button type="button" class="pwd-toggle" onclick="togglePwd('newPassword', this)">👁</button>
+          </div>
         </div>
         <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="custEmail" placeholder="your@email.com" />
+          <label>Confirm New Password *</label>
+          <div class="pwd-wrap">
+            <input type="password" id="confirmNewPassword" placeholder="Re-enter new password" />
+            <button type="button" class="pwd-toggle" onclick="togglePwd('confirmNewPassword', this)">👁</button>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Delivery Address *</label>
-          <textarea id="custAddress" placeholder="Full address with PIN code" required rows="3"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Remarks / Special Instructions</label>
-          <textarea id="custRemarks" placeholder="Any special requests, size notes, etc." rows="2"></textarea>
-        </div>
-        <button type="submit" class="submit-btn" id="submitBtn">Place Order</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- THANK YOU MODAL -->
-  <div class="overlay" id="thankYouOverlay">
-    <div class="modal thankyou-modal">
-      <div class="thankyou-header">
-        <div class="thankyou-icon">✅</div>
-        <h2>Order Placed Successfully!</h2>
-        <p class="thankyou-subtitle">Thank you! We will contact you shortly to confirm your order.</p>
-      </div>
-      <div class="thankyou-body">
-        <div class="order-id-box">
-          <span>Your Order ID</span>
-          <strong id="thankOrderId"></strong>
-        </div>
-        <div class="thankyou-summary" id="thankYouSummary"></div>
-      </div>
-      <div class="thankyou-footer">
-        <button class="continue-btn" onclick="closeThankYou()">Continue Shopping</button>
+        <button class="submit-btn" onclick="doResetPassword()">Reset Password →</button>
+        <p class="auth-switch"><a onclick="switchTab('login')">← Back to Login</a></p>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- AUTH MODAL (Login / Register) -->
-  <div class="overlay" id="authOverlay" onclick="closeAuthModal(event)">
-    <div class="modal auth-modal">
-      <!-- Tabs -->
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="loginTab" onclick="switchTab('login')">Login</button>
-        <button class="auth-tab" id="registerTab" onclick="switchTab('register')">Register</button>
-        <button class="close-btn auth-close" onclick="closeAuth()">✕</button>
-      </div>
+<!-- WISHLIST MODAL (standalone – preserved) -->
+<div class="side-modal-overlay" id="wishlistOverlay" onclick="closeWishlistModal(event)">
+  <div class="side-modal">
+    <div class="side-modal-header">
+      <h2>❤️ My Wishlist</h2>
+      <button onclick="closeWishlist()" class="close-side-modal">✕</button>
+    </div>
+    <div class="side-modal-body" id="wishlistItems"><p class="empty-msg">Your wishlist is empty.</p></div>
+  </div>
+</div>
 
-      <!-- LOGIN FORM -->
-      <div id="loginForm" class="auth-form">
-        <div class="auth-form-header">
-          <div class="auth-icon">🔐</div>
-          <h3>Welcome Back</h3>
-          <p>Login to access your cart, orders & wishlist</p>
-        </div>
-        <div class="auth-body">
-          <div class="form-group">
-            <label>Email Address *</label>
-            <input type="email" id="loginEmail" placeholder="your@email.com" />
-          </div>
-          <div class="form-group">
-            <label>Password *</label>
-            <div class="pwd-wrap">
-              <input type="password" id="loginPassword" placeholder="Enter your password" />
-              <button type="button" class="pwd-toggle" onclick="togglePwd('loginPassword', this)">👁</button>
-            </div>
-          </div>
-          <button class="submit-btn" onclick="doLogin()">Login →</button>
-          <p class="forgot-pwd-link"><a onclick="switchTab('forgot')">Forgot password?</a></p>
-          <p class="auth-switch">Don't have an account? <a onclick="switchTab('register')">Register here</a></p>
-        </div>
-      </div>
+<!-- ORDER HISTORY MODAL (standalone – preserved) -->
+<div class="side-modal-overlay" id="ordersOverlay" onclick="closeOrdersModal(event)">
+  <div class="side-modal">
+    <div class="side-modal-header">
+      <h2>📦 Order History</h2>
+      <button onclick="closeOrderHistory()" class="close-side-modal">✕</button>
+    </div>
+    <div class="side-modal-body" id="ordersContent"><p class="empty-msg">No orders yet.</p></div>
+  </div>
+</div>
 
-      <!-- REGISTER FORM -->
-      <div id="registerForm" class="auth-form" style="display:none">
-        <div class="auth-form-header">
-          <div class="auth-icon">✨</div>
-          <h3>Create Account</h3>
-          <p>Join us to enjoy a personalised shopping experience</p>
-        </div>
-        <div class="auth-body">
-          <div class="form-row-2">
-            <div class="form-group">
-              <label>First Name *</label>
-              <input type="text" id="regFirstName" placeholder="First name" />
-            </div>
-            <div class="form-group">
-              <label>Last Name *</label>
-              <input type="text" id="regLastName" placeholder="Last name" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Email Address *</label>
-            <input type="email" id="regEmail" placeholder="your@email.com" />
-          </div>
-          <div class="form-group">
-            <label>Phone Number *</label>
-            <input type="tel" id="regPhone" placeholder="10-digit mobile number" maxlength="10" />
-          </div>
-          <div class="form-group">
-            <label>Password *</label>
-            <div class="pwd-wrap">
-              <input type="password" id="regPassword" placeholder="Minimum 6 characters" />
-              <button type="button" class="pwd-toggle" onclick="togglePwd('regPassword', this)">👁</button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Confirm Password *</label>
-            <div class="pwd-wrap">
-              <input type="password" id="regConfirmPassword" placeholder="Re-enter password" />
-              <button type="button" class="pwd-toggle" onclick="togglePwd('regConfirmPassword', this)">👁</button>
-            </div>
-          </div>
-          <button class="submit-btn" onclick="doRegister()">Create Account →</button>
-          <p class="auth-switch">Already have an account? <a onclick="switchTab('login')">Login here</a></p>
-        </div>
+<!-- ACCOUNT PAGE MODAL -->
+<div class="account-overlay" id="accountOverlay" onclick="closeAccountModal(event)">
+  <div class="account-page">
+
+    <!-- Sidebar -->
+    <div class="acc-sidebar">
+      <div class="acc-user-block">
+        <div class="acc-avatar" id="accAvatar">?</div>
+        <div class="acc-user-name" id="accUserName">User</div>
+        <div class="acc-user-email" id="accUserEmail">email</div>
       </div>
-      <!-- FORGOT PASSWORD FORM -->
-      <div id="forgotForm" class="auth-form" style="display:none">
-        <div class="auth-form-header">
-          <div class="auth-icon">🔑</div>
-          <h3>Reset Password</h3>
-          <p>Enter your registered email to set a new password</p>
-        </div>
-        <div class="auth-body" id="forgotStep1">
-          <div class="form-group">
-            <label>Registered Email *</label>
-            <input type="email" id="forgotEmail" placeholder="your@email.com" />
-          </div>
-          <button class="submit-btn" onclick="doForgotPassword()">Find My Account →</button>
-          <p class="auth-switch">Remembered it? <a onclick="switchTab('login')">Back to Login</a></p>
-        </div>
-        <div class="auth-body" id="forgotStep2" style="display:none">
-          <div class="form-group">
-            <label>New Password *</label>
-            <div class="pwd-wrap">
-              <input type="password" id="newPassword" placeholder="Minimum 6 characters" />
-              <button type="button" class="pwd-toggle" onclick="togglePwd('newPassword', this)">👁</button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Confirm New Password *</label>
-            <div class="pwd-wrap">
-              <input type="password" id="confirmNewPassword" placeholder="Re-enter new password" />
-              <button type="button" class="pwd-toggle" onclick="togglePwd('confirmNewPassword', this)">👁</button>
-            </div>
-          </div>
-          <button class="submit-btn" onclick="doResetPassword()">Reset Password →</button>
-          <p class="auth-switch"><a onclick="switchTab('login')">← Back to Login</a></p>
-        </div>
-      </div>
+      <nav class="acc-nav">
+        <button class="acc-nav-btn active" id="accNav-profile" onclick="showAccountSection('profile')">
+          <span class="nav-icon">👤</span> Profile
+        </button>
+        <button class="acc-nav-btn" id="accNav-wishlist" onclick="showAccountSection('wishlist')">
+          <span class="nav-icon">❤️</span> My Wishlist
+        </button>
+        <button class="acc-nav-btn" id="accNav-orders" onclick="showAccountSection('orders')">
+          <span class="nav-icon">📦</span> Order History
+        </button>
+        <button class="acc-nav-btn" id="accNav-address" onclick="showAccountSection('address')">
+          <span class="nav-icon">📍</span> Addresses
+        </button>
+        <button class="acc-nav-btn" id="accNav-resetpwd" onclick="showAccountSection('resetpwd')">
+          <span class="nav-icon">🔑</span> Change Password
+        </button>
+        <button class="acc-nav-btn" id="accNav-help" onclick="showAccountSection('help')">
+          <span class="nav-icon">💬</span> Help Center
+        </button>
+      </nav>
+      <button class="acc-logout-btn" onclick="doLogout()">🚪 Logout</button>
+    </div>
+
+    <!-- Content area -->
+    <div class="account-content" id="accountContent">
+      <!-- Rendered by showAccountSection() -->
+    </div>
+
+    <!-- Close button -->
+    <button class="acc-close-btn" onclick="closeAccount()">✕</button>
+  </div>
+</div>
+
+<!-- SUCCESS TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span>🪷 Mathura Poshak Bhandaar</span>
+      <p>Quality wholesale dresses since years. Trusted by retailers across India.</p>
+    </div>
+    <div class="footer-contact">
+      <p>📞 <a href="tel:+919760096109">+91 97600 96109</a></p>
+      <p>💬 <a href="https://wa.me/919760096109" target="_blank">WhatsApp Us</a></p>
+      <p>📧 <a href="mailto:mathura.dress.bhandaar@gmail.com">mathura.dress.bhandaar@gmail.com</a></p>
     </div>
   </div>
+  <div class="footer-bottom">© 2026 Mathura Poshak Bhandaar. All rights reserved.</div>
+</footer>
 
-  <!-- WISHLIST MODAL -->
-  <div class="side-modal-overlay" id="wishlistOverlay" onclick="closeWishlistModal(event)">
-    <div class="side-modal">
-      <div class="side-modal-header">
-        <h2>❤️ My Wishlist</h2>
-        <button onclick="closeWishlist()" class="close-side-modal">✕</button>
-      </div>
-      <div class="side-modal-body" id="wishlistItems">
-        <p class="empty-msg">Your wishlist is empty.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ORDER HISTORY MODAL -->
-  <div class="side-modal-overlay" id="ordersOverlay" onclick="closeOrdersModal(event)">
-    <div class="side-modal">
-      <div class="side-modal-header">
-        <h2>📦 Order History</h2>
-        <button onclick="closeOrderHistory()" class="close-side-modal">✕</button>
-      </div>
-      <div class="side-modal-body" id="ordersContent">
-        <p class="empty-msg">No orders yet.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- SUCCESS TOAST -->
-  <div class="toast" id="toast"></div>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <span>🪷 Mathura Poshak Bhandaar</span>
-        <p>Quality wholesale dresses since years. Trusted by retailers across India.</p>
-      </div>
-      <div class="footer-contact">
-        <p>📞 <a href="tel:+919760096109">+91 97600 96109</a></p>
-        <p>💬 <a href="https://wa.me/919760096109" target="_blank">WhatsApp Us</a></p>
-        <p>📧 <a href="mailto:mathura.dress.bhandaar@gmail.com">mathura.dress.bhandaar@gmail.com</a></p>
-      </div>
-    </div>
-    <div class="footer-bottom">© 2026 Mathura Poshak Bhandaar. All rights reserved.</div>
-  </footer>
-
-  <script src="products.js?v=3"></script>
-  <script src="app.js?v=12"></script>
+<script src="products.js?v=3"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>
