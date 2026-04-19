@@ -742,6 +742,214 @@ function renderHelpSection() {
 }
 
 // =============================================
+// PRODUCT DETAIL
+// =============================================
+let _currentProductId = null;
+
+const COLOR_MAP = {
+  "blue":"#4a90d9","red":"#d94a4a","yellow":"#f5c518","green":"#4caf50","pink":"#e91e8c",
+  "orange":"#ff6600","purple":"#7c4dff","white":"#e0d6ce","black":"#444","teal":"#009688",
+  "golden":"#d4a017","gold":"#d4a017","brown":"#795548","grey":"#9e9e9e","gray":"#9e9e9e",
+  "light pink":"#ffb6c1","sky blue":"#87ceeb","navy":"#1a237e","maroon":"#800000",
+  "cream":"#fffdd0","magenta":"#e91e63","aqua":"#00bcd4","black":"#222"
+};
+
+function openProduct(id) {
+  const prods = window.PRODUCTS || PRODUCTS;
+  const p = prods.find(x => x.id === id);
+  if (!p) return;
+  _currentProductId = id;
+
+  // Update URL with slug for shareability
+  const slug = p.slug || ("product-" + id);
+  history.pushState({ productId: id }, "", "?product=" + encodeURIComponent(slug));
+
+  // Build image list: main + sub images
+  const allImages = [p.image, ...(p.subImages || [])].filter(Boolean);
+
+  // Gallery
+  document.getElementById("galleryMainImg").src = allImages[0] || "";
+  document.getElementById("galleryMainImg").alt = p.name;
+  const thumbsEl = document.getElementById("galleryThumbs");
+  thumbsEl.innerHTML = allImages.length > 1 ? allImages.map((url, i) => `
+    <div class="gallery-thumb ${i === 0 ? "active" : ""}" onclick="switchGalleryImg(${i}, this, ${JSON.stringify(allImages).replace(/"/g,'&quot;')})">
+      <img src="${url}" alt="${p.name} image ${i+1}" onerror="this.parentElement.style.display='none'" loading="lazy" />
+    </div>`).join("") : "";
+
+  // Category & Name
+  document.getElementById("detailCategory").textContent = p.category || "";
+  document.getElementById("detailName").textContent = p.name;
+  document.getElementById("detailPrice").textContent = "₹" + p.price;
+
+  // Stock
+  const stockEl = document.getElementById("detailStock");
+  if (p.stock === 0) { stockEl.textContent = "Out of Stock"; stockEl.className = "detail-stock-badge out-stock"; }
+  else if (p.stock <= 3) { stockEl.textContent = "Low Stock — Only " + p.stock + " left"; stockEl.className = "detail-stock-badge in-stock"; }
+  else { stockEl.textContent = "In Stock"; stockEl.className = "detail-stock-badge in-stock"; }
+
+  // Description
+  const descEl = document.getElementById("detailDescription");
+  descEl.textContent = p.description || "";
+  descEl.style.display = p.description ? "block" : "none";
+
+  // Attributes (sizes + colors)
+  const colorDots = (p.colors || [p.color]).map(c => {
+    const bg = COLOR_MAP[(c||"").toLowerCase()] || "#ccc";
+    return `<span class="detail-attr-tag"><span class="detail-color-dot" style="background:${bg}"></span>${c}</span>`;
+  }).join("");
+  const sizeTags = (p.sizes || [p.size]).map(s => `<span class="detail-attr-tag">📏 ${s}</span>`).join("");
+  document.getElementById("detailAttrs").innerHTML = `
+    <div class="detail-attr-row">
+      <div class="detail-attr-label">Colors</div>
+      <div class="detail-attr-tags">${colorDots}</div>
+    </div>
+    <div class="detail-attr-row">
+      <div class="detail-attr-label">Sizes</div>
+      <div class="detail-attr-tags">${sizeTags}</div>
+    </div>`;
+
+  // Cart button
+  const cartBtn = document.getElementById("detailAddCartBtn");
+  cartBtn.disabled = p.stock === 0;
+  cartBtn.textContent = p.stock === 0 ? "Out of Stock" : "+ Add to Cart";
+
+  // WhatsApp
+  const waText = encodeURIComponent(`Hi, I'm interested in ordering: ${p.name} (₹${p.price}). Please share availability and bulk pricing.`);
+  document.getElementById("detailWhatsappBtn").href = `https://wa.me/919760096109?text=${waText}`;
+
+  document.getElementById("productOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function switchGalleryImg(idx, thumbEl, images) {
+  document.getElementById("galleryMainImg").src = images[idx];
+  document.querySelectorAll(".gallery-thumb").forEach(t => t.classList.remove("active"));
+  thumbEl.classList.add("active");
+}
+
+function detailAddToCart() {
+  if (_currentProductId) {
+    addToCart(_currentProductId);
+    closeProduct();
+  }
+}
+
+function closeProduct() {
+  document.getElementById("productOverlay").classList.remove("open");
+  document.body.style.overflow = "";
+  _currentProductId = null;
+  // Restore URL
+  history.pushState({}, "", location.pathname);
+}
+
+function closeProductModal(e) {
+  if (e.target === document.getElementById("productOverlay")) closeProduct();
+}
+
+function copyProductLink() {
+  navigator.clipboard.writeText(location.href).then(() => showToast("🔗 Link copied!"));
+}
+
+// Handle ?product=slug on page load
+function checkProductSlugInUrl() {
+  const params = new URLSearchParams(location.search);
+  const slug = params.get("product");
+  if (!slug) return;
+  const prods = window.PRODUCTS || PRODUCTS;
+  const p = prods.find(x => x.slug === slug || ("product-" + x.id) === slug);
+  if (p) openProduct(p.id);
+}
+
+// Handle browser back button closing modal
+window.addEventListener("popstate", () => {
+  const overlay = document.getElementById("productOverlay");
+  if (overlay && overlay.classList.contains("open")) {
+    overlay.classList.remove("open");
+    document.body.style.overflow = "";
+    _currentProductId = null;
+  }
+});
+
+// =============================================
+// HERO CAROUSEL
+// =============================================
+let _carouselIdx = 0;
+let _carouselTotal = 1;
+let _carouselTimer = null;
+
+function buildCarousel(products) {
+  const track = document.getElementById("carouselTrack");
+  const dotsEl = document.getElementById("carouselDots");
+  if (!track || !dotsEl || !products || !products.length) return;
+
+  // Pick up to 6 in-stock products with images
+  const slides = products
+    .filter(p => p.stock > 0 && p.image && !p.image.includes("placehold"))
+    .slice(0, 6);
+  if (!slides.length) return;
+
+  _carouselTotal = slides.length;
+  _carouselIdx   = 0;
+
+  track.innerHTML = slides.map((p, i) => `
+    <div class="carousel-slide${i === 0 ? " active" : ""}"
+         style="background-image:url('${p.image}');background-size:cover;background-position:center">
+      <div class="carousel-overlay"></div>
+      <div class="carousel-content">
+        <span class="carousel-tag">${p.category || "Collection"}</span>
+        <h1>${p.name}</h1>
+        <p>${(p.colors||[]).join(", ")} &nbsp;·&nbsp; ${(p.sizes||[]).join(", ")}</p>
+        <div class="carousel-btns">
+          <a href="#products" class="carousel-cta-primary" onclick="carouselShopNow(${p.id})">Shop Now</a>
+          <a href="https://wa.me/919760096109?text=Hi%2C%20I%27m%20interested%20in%20${encodeURIComponent(p.name)}" target="_blank" class="carousel-cta-secondary">WhatsApp Order</a>
+        </div>
+      </div>
+      <div class="carousel-price-badge">₹${p.price}</div>
+    </div>`).join("");
+
+  dotsEl.innerHTML = slides.map((_, i) =>
+    `<button class="carousel-dot${i === 0 ? " active" : ""}" onclick="carouselGoTo(${i})"></button>`
+  ).join("");
+
+  carouselAutoPlay();
+}
+
+function carouselGoTo(idx) {
+  const slides = document.querySelectorAll(".carousel-slide");
+  const dots   = document.querySelectorAll(".carousel-dot");
+  if (!slides.length) return;
+  slides[_carouselIdx].classList.remove("active");
+  if (dots[_carouselIdx]) dots[_carouselIdx].classList.remove("active");
+  _carouselIdx = (idx + slides.length) % slides.length;
+  slides[_carouselIdx].classList.add("active");
+  if (dots[_carouselIdx]) dots[_carouselIdx].classList.add("active");
+}
+
+function carouselMove(dir) {
+  carouselGoTo(_carouselIdx + dir);
+  carouselAutoPlay(); // reset timer on manual nav
+}
+
+function carouselAutoPlay() {
+  if (_carouselTimer) clearInterval(_carouselTimer);
+  _carouselTimer = setInterval(() => carouselGoTo(_carouselIdx + 1), 4000);
+}
+
+function carouselShopNow(productId) {
+  // Scroll to products and highlight
+  document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+}
+
+// Pause on hover
+document.addEventListener("DOMContentLoaded", () => {
+  const carousel = document.getElementById("heroCarousel");
+  if (carousel) {
+    carousel.addEventListener("mouseenter", () => { if (_carouselTimer) clearInterval(_carouselTimer); });
+    carousel.addEventListener("mouseleave", carouselAutoPlay);
+  }
+});
+
+// =============================================
 // SEARCH & FILTER
 // =============================================
 function applyFilters() {
@@ -808,12 +1016,12 @@ function renderProducts(products) {
     }).join("");
     return `
       <div class="product-card" id="card-${p.id}">
-        <div class="product-img-wrap">
+        <div class="product-img-wrap" onclick="openProduct(${p.id})" style="cursor:pointer">
           <img class="product-img" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x400?text=No+Image'"/>
-          <button class="wish-btn ${wished?"active":""}" id="wish-${p.id}" onclick="toggleWishlist(${p.id})" title="Wishlist">&#9829;</button>
+          <button class="wish-btn ${wished?"active":""}" id="wish-${p.id}" onclick="event.stopPropagation();toggleWishlist(${p.id})" title="Wishlist">&#9829;</button>
         </div>
         <div class="product-info">
-          <div class="product-name">${p.name}</div>
+          <div class="product-name" onclick="openProduct(${p.id})" style="cursor:pointer">${p.name}</div>
           <div class="product-tags"><span class="tag tag-cat">${p.category}</span>${sizeTags}${colorTags}</div>
           <div class="product-bottom">
             <span class="product-price">&#8377;${p.price}</span>
@@ -1079,6 +1287,10 @@ async function loadProductsFromSheet() {
     const stockCol= col("set_quantity") >= 0 ? col("set_quantity") : col("stock");
     const stockStatusCol = col("stock_status");
     const imgCol  = col("image_url") >= 0 ? col("image_url") : col("image");
+    const subImgCol  = col("sub_images");
+    const descCol    = col("description");
+    const slugCol    = col("slug");
+
     const loaded  = rows.slice(1)
       .filter(r => nameCol >= 0 && (r[nameCol] || "").trim())
       .map((row, i) => {
@@ -1092,14 +1304,20 @@ async function loadProductsFromSheet() {
         const pid     = idCol >= 0 ? (parseInt(row[idCol]) || i + 1) : (i + 1);
         const imgUrl  = imgCol >= 0 ? (row[imgCol] || "").trim() : "";
         const cat     = catCol >= 0 ? ((row[catCol] || "Dress").trim() || "Dress") : "Dress";
+        const subImgs = subImgCol >= 0 ? ((row[subImgCol] || "").split(",").map(u => u.trim()).filter(Boolean)) : [];
+        const desc    = descCol >= 0 ? (row[descCol] || "").trim() : "";
+        const slug    = slugCol >= 0 ? (row[slugCol] || "").trim() : "";
         return { id: pid, name, category: cat, price: parseInt(row[priceCol]) || 0,
           sizes: sizes.length ? sizes : ["M"], colors: cols.length ? cols : ["Red"],
           size: sizes[0] || "M", color: cols[0] || "Red", stock,
-          image: imgUrl || ("https://placehold.co/300x400/f5ede8/8B1A1A?text=" + encodeURIComponent(name)) };
+          image: imgUrl || ("https://placehold.co/300x400/f5ede8/8B1A1A?text=" + encodeURIComponent(name)),
+          subImages: subImgs, description: desc, slug };
       });
     if (loaded.length === 0) return false;
     window.PRODUCTS = loaded;
     updateDynamicFilters();
+    buildCarousel(loaded);
+    checkProductSlugInUrl(); // auto-open if URL has ?product=slug
     return true;
   } catch (err) {
     console.warn("[Sheet sync failed, using bundled products]", err.message);
