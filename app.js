@@ -46,10 +46,16 @@ async function fetchSheetAddresses(email) {
 }
 async function apiSaveAddress(email, label, text, isDefault, id) {
   const payload = { email, label, text, isDefault: !!isDefault, id: id || null };
-  try { await fetch(ORDERS_API_URL + "?action=saveAddress&data=" + encodeURIComponent(JSON.stringify(payload)), { method:"GET", mode:"no-cors" }); } catch(e){}
+  try {
+    const r = await fetch(ORDERS_API_URL + "?action=saveAddress&data=" + encodeURIComponent(JSON.stringify(payload)));
+    await r.json();
+  } catch(e){}
 }
 async function apiDeleteAddress(id) {
-  try { await fetch(ORDERS_API_URL + "?action=deleteAddress&data=" + encodeURIComponent(JSON.stringify({ id })), { method:"GET", mode:"no-cors" }); } catch(e){}
+  try {
+    const r = await fetch(ORDERS_API_URL + "?action=deleteAddress&data=" + encodeURIComponent(JSON.stringify({ id })));
+    await r.json();
+  } catch(e){}
 }
 
 // =============================================
