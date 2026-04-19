@@ -1108,9 +1108,10 @@ async function loadProductsFromSheet() {
 }
 
 function updateDynamicFilters() {
-  const cats   = [...new Set(PRODUCTS.map(p => p.category).filter(Boolean))];
-  const sizes  = [...new Set(PRODUCTS.flatMap(p => p.sizes  || [p.size  || "M"]).filter(Boolean))];
-  const colors = [...new Set(PRODUCTS.flatMap(p => p.colors || [p.color || "Red"]).filter(Boolean))];
+  const prods  = window.PRODUCTS || PRODUCTS;
+  const cats   = [...new Set(prods.map(p => p.category).filter(Boolean))];
+  const sizes  = [...new Set(prods.flatMap(p => p.sizes  || [p.size  || "M"]).filter(Boolean))];
+  const colors = [...new Set(prods.flatMap(p => p.colors || [p.color || "Red"]).filter(Boolean))];
   const catSel = document.getElementById("filterCategory");
   if (catSel && cats.length) catSel.innerHTML = '<option value="">🏷️ All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join("");
   const sizeSel = document.getElementById("filterSize");
@@ -1133,7 +1134,7 @@ function toggleFilterPanel() {
 document.addEventListener("DOMContentLoaded", async () => {
   loadSession();
   renderProducts();
-  if (SHEET_CSV_URL) { const loaded = await loadProductsFromSheet(); if (loaded) renderProducts(); }
+  if (SHEET_CSV_URL) { const loaded = await loadProductsFromSheet(); if (loaded) { renderProducts(); updateDynamicFilters(); } }
   document.addEventListener("visibilitychange", async () => {
     if (!document.hidden && SHEET_CSV_URL) { const ok = await loadProductsFromSheet(); if (ok) renderProducts(); }
   });
