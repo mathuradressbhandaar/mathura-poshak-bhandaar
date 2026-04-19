@@ -30,16 +30,19 @@ function saveUserCart(email, c) { localStorage.setItem("mpb_cart_" + email, JSON
 function getUserWishlist(email) { try { return JSON.parse(localStorage.getItem("mpb_wishlist_" + email) || "[]"); } catch(e) { return []; } }
 function saveUserWishlist(email, w) { localStorage.setItem("mpb_wishlist_" + email, JSON.stringify(w)); }
 // Orders & Addresses — backed by Google Sheets
-// Address cache — instant reads, background Sheets sync
+// Address & Order cache — instant reads, background Sheets sync
 function getCachedAddresses(email) { try { return JSON.parse(localStorage.getItem("mpb_addrcache_" + email) || "null"); } catch(e) { return null; } }
 function setCachedAddresses(email, list) { localStorage.setItem("mpb_addrcache_" + email, JSON.stringify(list)); }
+function getCachedOrders(email) { try { return JSON.parse(localStorage.getItem("mpb_ordercache_" + email) || "null"); } catch(e) { return null; } }
+function setCachedOrders(email, list) { localStorage.setItem("mpb_ordercache_" + email, JSON.stringify(list)); }
 
 async function fetchSheetOrders(email) {
   try {
     const r = await fetch(ORDERS_API_URL + "?action=getOrders&email=" + encodeURIComponent(email));
     const d = await r.json();
-    return d.status === "success" ? d.orders : [];
-  } catch(e) { return []; }
+    if (d.status === "success") { setCachedOrders(email, d.orders); return d.orders; }
+    return getCachedOrders(email) || [];
+  } catch(e) { return getCachedOrders(email) || []; }
 }
 async function fetchSheetAddresses(email) {
   try {
@@ -336,8 +339,17 @@ function closeOrdersModal(e) { if (e.target === document.getElementById("ordersO
 
 async function renderOrderHistory() {
   const container = document.getElementById("ordersContent");
-  container.innerHTML = '<p class="empty-msg">⏳ Loading orders…</p>';
+  // Show cache instantly, no spinner if we have data
+  const cached = getCachedOrders(currentUser.email);
+  if (cached && cached.length) {
+    renderOrderHistoryCards(container, cached);
+  } else {
+    container.innerHTML = '<p class="empty-msg">⏳ Loading orders…</p>';
+  }
   const orders = await fetchSheetOrders(currentUser.email);
+  renderOrderHistoryCards(container, orders);
+}
+function renderOrderHistoryCards(container, orders) {
   if (orders.length === 0) { container.innerHTML = '<p class="empty-msg">📭 No orders yet.<br>Place your first order today!</p>'; return; }
   container.innerHTML = orders.map(o => `
     <div class="order-card">
@@ -364,7 +376,13 @@ function openAccount() {
   document.getElementById("accUserEmail").textContent = currentUser.email;
   document.getElementById("accountOverlay").classList.add("open");
   showAccountSection("profile");
-  // Load profile stats async
+  // Load profile stats — show cached counts instantly, refresh in background
+  const cachedO = getCachedOrders(currentUser.email);
+  const cachedA = getCachedAddresses(currentUser.email);
+  const elO = document.getElementById("statOrders");
+  const elA = document.getElementById("statAddresses");
+  if (cachedO && elO) elO.textContent = cachedO.length;
+  if (cachedA && elA) elA.textContent = cachedA.length;
   fetchSheetOrders(currentUser.email).then(o => { const el = document.getElementById("statOrders"); if(el) el.textContent = o.length; });
   fetchSheetAddresses(currentUser.email).then(a => { const el = document.getElementById("statAddresses"); if(el) el.textContent = a.length; });
 }
@@ -418,10 +436,7 @@ function showAccountSection(section) {
   if (section === "address") loadAccountAddresses();
 }
 
-async function loadAccountOrders() {
-  const el = document.getElementById("accOrdersContent");
-  if (!el || !currentUser) return;
-  const orders = await fetchSheetOrders(currentUser.email);
+function renderOrderList(el, orders) {
   if (!orders.length) {
     el.innerHTML = `<div class="acc-empty-state">📭<p>No orders yet</p><span>Your order history will appear here after your first purchase</span></div>`;
     return;
@@ -438,6 +453,18 @@ async function loadAccountOrders() {
       <div class="acc-order-total">Total: ₹${o.total || 0}</div>
       ${o.remarks ? `<div class="acc-order-remarks">Note: ${o.remarks}</div>` : ""}
     </div>`).join("");
+}
+
+async function loadAccountOrders() {
+  const el = document.getElementById("accOrdersContent");
+  if (!el || !currentUser) return;
+  // Show cached orders instantly
+  const cached = getCachedOrders(currentUser.email);
+  if (cached) renderOrderList(el, cached);
+  // Refresh from Sheets in background
+  const fresh = await fetchSheetOrders(currentUser.email);
+  const currentEl = document.getElementById("accOrdersContent");
+  if (currentEl) renderOrderList(currentEl, fresh);
 }
 
 function renderAddressList(el, addresses) {
