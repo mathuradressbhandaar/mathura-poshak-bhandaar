@@ -46,16 +46,10 @@ async function fetchSheetAddresses(email) {
 }
 async function apiSaveAddress(email, label, text, isDefault, id) {
   const payload = { email, label, text, isDefault: !!isDefault, id: id || null };
-  try {
-    const r = await fetch(ORDERS_API_URL + "?action=saveAddress&data=" + encodeURIComponent(JSON.stringify(payload)));
-    await r.json();
-  } catch(e){}
+  try { await fetch(ORDERS_API_URL + "?action=saveAddress&data=" + encodeURIComponent(JSON.stringify(payload)), { method:"GET", mode:"no-cors" }); } catch(e){}
 }
 async function apiDeleteAddress(id) {
-  try {
-    const r = await fetch(ORDERS_API_URL + "?action=deleteAddress&data=" + encodeURIComponent(JSON.stringify({ id })));
-    await r.json();
-  } catch(e){}
+  try { await fetch(ORDERS_API_URL + "?action=deleteAddress&data=" + encodeURIComponent(JSON.stringify({ id })), { method:"GET", mode:"no-cors" }); } catch(e){}
 }
 
 // =============================================
@@ -475,9 +469,13 @@ async function addAddr() {
   const text  = (document.getElementById("newAddrText").value || "").trim();
   const isDef = document.getElementById("newAddrDefault").checked;
   if (!text) { showToast("Please enter an address"); return; }
+  const btn = document.querySelector(".acc-add-addr-form .acc-save-btn");
+  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
   showToast("Saving address…");
   const id = "addr_" + Date.now();
   await apiSaveAddress(currentUser.email, label, text, isDef, id);
+  // Wait for Google Sheets to commit the row before reloading
+  await new Promise(r => setTimeout(r, 2500));
   showToast("✅ Address saved!");
   showAccountSection("address");
 }
@@ -486,17 +484,18 @@ async function deleteAddr(id) {
   if (!confirm("Remove this address?")) return;
   showToast("Removing…");
   await apiDeleteAddress(id);
+  await new Promise(r => setTimeout(r, 2500));
   showToast("Address removed");
   showAccountSection("address");
 }
 
 async function setDefaultAddr(id) {
   showToast("Updating default…");
-  // Fetch current address details, then re-save with isDefault = true
   const addresses = await fetchSheetAddresses(currentUser.email);
   const addr = addresses.find(a => a.id === id);
   if (!addr) return;
   await apiSaveAddress(currentUser.email, addr.label, addr.text, true, id);
+  await new Promise(r => setTimeout(r, 2500));
   showToast("✅ Default address updated!");
   showAccountSection("address");
 }
