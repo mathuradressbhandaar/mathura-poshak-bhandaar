@@ -30,6 +30,10 @@ function saveUserCart(email, c) { localStorage.setItem("mpb_cart_" + email, JSON
 function getUserWishlist(email) { try { return JSON.parse(localStorage.getItem("mpb_wishlist_" + email) || "[]"); } catch(e) { return []; } }
 function saveUserWishlist(email, w) { localStorage.setItem("mpb_wishlist_" + email, JSON.stringify(w)); }
 // Orders & Addresses — backed by Google Sheets
+// Address cache — instant reads, background Sheets sync
+function getCachedAddresses(email) { try { return JSON.parse(localStorage.getItem("mpb_addrcache_" + email) || "null"); } catch(e) { return null; } }
+function setCachedAddresses(email, list) { localStorage.setItem("mpb_addrcache_" + email, JSON.stringify(list)); }
+
 async function fetchSheetOrders(email) {
   try {
     const r = await fetch(ORDERS_API_URL + "?action=getOrders&email=" + encodeURIComponent(email));
@@ -41,8 +45,9 @@ async function fetchSheetAddresses(email) {
   try {
     const r = await fetch(ORDERS_API_URL + "?action=getAddresses&email=" + encodeURIComponent(email));
     const d = await r.json();
-    return d.status === "success" ? d.addresses : [];
-  } catch(e) { return []; }
+    if (d.status === "success") { setCachedAddresses(email, d.addresses); return d.addresses; }
+    return getCachedAddresses(email) || [];
+  } catch(e) { return getCachedAddresses(email) || []; }
 }
 async function apiSaveAddress(email, label, text, isDefault, id) {
   const payload = { email, label, text, isDefault: !!isDefault, id: id || null };
@@ -435,10 +440,7 @@ async function loadAccountOrders() {
     </div>`).join("");
 }
 
-async function loadAccountAddresses() {
-  const el = document.getElementById("accAddrContent");
-  if (!el || !currentUser) return;
-  const addresses = await fetchSheetAddresses(currentUser.email);
+function renderAddressList(el, addresses) {
   let html = "";
   if (!addresses.length) {
     html += `<div class="acc-empty-state">📍<p>No saved addresses</p><span>Save addresses for faster checkout</span></div>`;
@@ -464,40 +466,58 @@ async function loadAccountAddresses() {
   el.innerHTML = html;
 }
 
+async function loadAccountAddresses() {
+  const el = document.getElementById("accAddrContent");
+  if (!el || !currentUser) return;
+  // Show cached addresses instantly
+  const cached = getCachedAddresses(currentUser.email);
+  if (cached) {
+    renderAddressList(el, cached);
+  }
+  // Refresh from Sheets in background and update if different
+  const fresh = await fetchSheetAddresses(currentUser.email);
+  const currentEl = document.getElementById("accAddrContent");
+  if (currentEl) renderAddressList(currentEl, fresh);
+}
+
 async function addAddr() {
   const label = (document.getElementById("newAddrLabel").value || "Address").trim();
   const text  = (document.getElementById("newAddrText").value || "").trim();
   const isDef = document.getElementById("newAddrDefault").checked;
   if (!text) { showToast("Please enter an address"); return; }
-  const btn = document.querySelector(".acc-add-addr-form .acc-save-btn");
-  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
-  showToast("Saving address…");
+
   const id = "addr_" + Date.now();
-  await apiSaveAddress(currentUser.email, label, text, isDef, id);
-  // Wait for Google Sheets to commit the row before reloading
-  await new Promise(r => setTimeout(r, 2500));
+  // 1. Update cache instantly so UI is immediate
+  const cached = getCachedAddresses(currentUser.email) || [];
+  if (isDef) cached.forEach(a => a.isDefault = false);
+  cached.push({ id, email: currentUser.email, label, text, isDefault: isDef });
+  setCachedAddresses(currentUser.email, cached);
+  // 2. Fire-and-forget to Sheets in background
+  apiSaveAddress(currentUser.email, label, text, isDef, id);
   showToast("✅ Address saved!");
-  showAccountSection("address");
+  showAccountSection("address"); // instant — reads from cache
 }
 
 async function deleteAddr(id) {
   if (!confirm("Remove this address?")) return;
-  showToast("Removing…");
-  await apiDeleteAddress(id);
-  await new Promise(r => setTimeout(r, 2500));
+  // 1. Remove from cache instantly
+  const cached = (getCachedAddresses(currentUser.email) || []).filter(a => a.id !== id);
+  setCachedAddresses(currentUser.email, cached);
+  // 2. Fire-and-forget to Sheets
+  apiDeleteAddress(id);
   showToast("Address removed");
-  showAccountSection("address");
+  showAccountSection("address"); // instant
 }
 
 async function setDefaultAddr(id) {
-  showToast("Updating default…");
-  const addresses = await fetchSheetAddresses(currentUser.email);
-  const addr = addresses.find(a => a.id === id);
-  if (!addr) return;
-  await apiSaveAddress(currentUser.email, addr.label, addr.text, true, id);
-  await new Promise(r => setTimeout(r, 2500));
+  // 1. Update cache instantly
+  const cached = getCachedAddresses(currentUser.email) || [];
+  cached.forEach(a => a.isDefault = (a.id === id));
+  setCachedAddresses(currentUser.email, cached);
+  const addr = cached.find(a => a.id === id);
+  if (addr) apiSaveAddress(currentUser.email, addr.label, addr.text, true, id);
   showToast("✅ Default address updated!");
-  showAccountSection("address");
+  showAccountSection("address"); // instant
 }
 
 function renderProfileSection() {
@@ -855,10 +875,7 @@ function openCheckout() {
   document.getElementById("modalOverlay").classList.add("open");
 }
 
-async function loadCheckoutAddresses() {
-  const addrGroup = document.getElementById("checkoutAddrGroup");
-  if (!addrGroup || !currentUser) return;
-  const addresses = await fetchSheetAddresses(currentUser.email);
+function renderCheckoutAddresses(addrGroup, addresses) {
   if (!addresses.length) {
     // No saved addresses — show plain textarea
     addrGroup.innerHTML = `<label>Delivery Address *</label><textarea id="custAddress" placeholder="Full address with PIN code" required rows="3"></textarea>`;
@@ -891,6 +908,18 @@ async function loadCheckoutAddresses() {
   });
   // Set initial textarea value for form submission
   onCheckoutAddrChange(encodeURIComponent(defaultAddr.text));
+}
+
+async function loadCheckoutAddresses() {
+  const addrGroup = document.getElementById("checkoutAddrGroup");
+  if (!addrGroup || !currentUser) return;
+  // Show cached addresses instantly (no spinner)
+  const cached = getCachedAddresses(currentUser.email);
+  if (cached) renderCheckoutAddresses(addrGroup, cached);
+  // Refresh from Sheets in background
+  const fresh = await fetchSheetAddresses(currentUser.email);
+  const el = document.getElementById("checkoutAddrGroup");
+  if (el) renderCheckoutAddresses(el, fresh);
 }
 
 function onCheckoutAddrChange(val) {
