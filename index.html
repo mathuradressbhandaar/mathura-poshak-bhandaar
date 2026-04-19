@@ -495,6 +495,200 @@
       .profile-field-row { grid-template-columns: 1fr; }
       .acc-section-body { padding: 16px; }
     }
+
+    /* ── PRODUCT DETAIL MODAL ─────────────────────── */
+    .product-overlay {
+      display:none; position:fixed; inset:0; z-index:2000;
+      background:rgba(0,0,0,0.65); backdrop-filter:blur(4px);
+      align-items:center; justify-content:center; padding:16px;
+    }
+    .product-overlay.open { display:flex; }
+    .product-modal {
+      background:#fff; border-radius:16px; max-width:960px; width:100%;
+      max-height:92vh; overflow-y:auto; position:relative;
+      box-shadow:0 24px 64px rgba(0,0,0,0.35);
+      animation:modalIn .25s ease;
+    }
+    @keyframes modalIn { from{transform:translateY(24px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .product-modal-close {
+      position:sticky; top:12px; float:right; margin:12px 12px 0 0;
+      width:36px; height:36px; border-radius:50%; border:none;
+      background:rgba(0,0,0,0.08); cursor:pointer; font-size:1rem;
+      display:flex; align-items:center; justify-content:center; z-index:10;
+      transition:background .15s;
+    }
+    .product-modal-close:hover { background:rgba(0,0,0,0.18); }
+    .product-modal-body {
+      display:grid; grid-template-columns:1fr 1fr; gap:0;
+      padding:24px; clear:both;
+    }
+    /* Gallery */
+    .product-gallery { padding-right:24px; }
+    .gallery-main-wrap {
+      width:100%; aspect-ratio:3/4; overflow:hidden;
+      border-radius:12px; background:#f8f0f0; margin-bottom:12px;
+    }
+    .gallery-main-wrap img {
+      width:100%; height:100%; object-fit:cover;
+      transition:opacity .2s;
+    }
+    .gallery-thumbs { display:flex; gap:8px; flex-wrap:wrap; }
+    .gallery-thumb {
+      width:64px; height:80px; border-radius:8px; overflow:hidden;
+      cursor:pointer; border:2px solid transparent;
+      transition:border-color .15s; flex-shrink:0;
+    }
+    .gallery-thumb:hover { border-color:#8B1A1A; }
+    .gallery-thumb.active { border-color:#8B1A1A; }
+    .gallery-thumb img { width:100%; height:100%; object-fit:cover; }
+    /* Info */
+    .product-detail-info { padding-left:8px; display:flex; flex-direction:column; gap:12px; }
+    .detail-category {
+      font-size:.72rem; font-weight:700; letter-spacing:1.5px;
+      text-transform:uppercase; color:#8B1A1A;
+    }
+    .detail-name {
+      font-family:'Playfair Display',serif; font-size:1.6rem;
+      font-weight:700; color:#1a0505; line-height:1.2; margin:0;
+    }
+    .detail-price { font-size:1.8rem; font-weight:800; color:#8B1A1A; }
+    .detail-stock-badge {
+      display:inline-block; padding:4px 14px; border-radius:20px;
+      font-size:.8rem; font-weight:700; width:fit-content;
+    }
+    .detail-stock-badge.in-stock { background:#e8f5e9; color:#2e7d32; }
+    .detail-stock-badge.out-stock { background:#fce4e4; color:#c62828; }
+    .detail-description { color:#555; font-size:.92rem; line-height:1.7; margin:0; }
+    .detail-attrs { display:flex; flex-direction:column; gap:10px; }
+    .detail-attr-row { display:flex; flex-direction:column; gap:6px; }
+    .detail-attr-label { font-size:.72rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#888; }
+    .detail-attr-tags { display:flex; flex-wrap:wrap; gap:6px; }
+    .detail-attr-tag {
+      padding:4px 12px; border-radius:20px; font-size:.82rem;
+      background:#f9f0f0; color:#5a1a1a; border:1px solid #e8c8c8;
+    }
+    .detail-color-dot {
+      width:14px; height:14px; border-radius:50%; display:inline-block;
+      vertical-align:middle; margin-right:5px; border:1px solid rgba(0,0,0,.12);
+    }
+    .detail-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+    .detail-add-cart-btn {
+      flex:1; padding:14px 20px; background:#8B1A1A; color:#fff;
+      border:none; border-radius:8px; font-weight:700; font-size:.95rem;
+      cursor:pointer; transition:background .2s; min-width:140px;
+    }
+    .detail-add-cart-btn:hover { background:#a31f1f; }
+    .detail-add-cart-btn:disabled { background:#ccc; cursor:not-allowed; }
+    .detail-whatsapp-btn {
+      flex:1; padding:14px 16px; background:#25d366; color:#fff;
+      border-radius:8px; font-weight:700; font-size:.9rem;
+      text-decoration:none; display:flex; align-items:center;
+      justify-content:center; gap:7px; transition:background .2s; min-width:140px;
+    }
+    .detail-whatsapp-btn:hover { background:#1ebe5d; }
+    .detail-share-btn {
+      background:none; border:1px solid #ddd; border-radius:8px;
+      padding:8px 16px; font-size:.82rem; cursor:pointer; color:#666;
+      transition:background .15s; align-self:flex-start;
+    }
+    .detail-share-btn:hover { background:#f5f5f5; }
+    @media(max-width:700px) {
+      .product-modal-body { grid-template-columns:1fr; }
+      .product-gallery { padding-right:0; margin-bottom:20px; }
+      .gallery-main-wrap { aspect-ratio:4/3; }
+      .detail-name { font-size:1.25rem; }
+    }
+    /* ── HERO CAROUSEL ─────────────────────────────── */
+    .hero-carousel { position: relative; width: 100%; height: 480px; overflow: hidden; background: #1a0a0a; }
+    .carousel-track { display: flex; height: 100%; transition: none; }
+    .carousel-slide {
+      min-width: 100%; height: 100%; position: relative;
+      background-size: cover; background-position: center;
+      display: flex; align-items: center; justify-content: flex-start;
+      opacity: 0; transition: opacity 0.7s ease; position: absolute; inset: 0;
+    }
+    .carousel-slide.active { opacity: 1; z-index: 1; }
+    .carousel-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(10,2,2,0.78) 0%, rgba(10,2,2,0.45) 55%, rgba(10,2,2,0.15) 100%);
+    }
+    .carousel-content {
+      position: relative; z-index: 2;
+      max-width: 540px; padding: 0 64px;
+      color: #fff;
+    }
+    .carousel-tag {
+      display: inline-block; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+      padding: 4px 14px; border-radius: 20px; margin-bottom: 16px; color: #ffd9d9;
+    }
+    .carousel-content h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700; line-height: 1.15; margin: 0 0 12px;
+      color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+    .carousel-content p {
+      font-size: 1rem; color: rgba(255,255,255,0.85);
+      margin: 0 0 28px; line-height: 1.6;
+    }
+    .carousel-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .carousel-cta-primary {
+      display: inline-block; padding: 13px 32px;
+      background: #8B1A1A; color: #fff;
+      border-radius: 6px; font-weight: 700; font-size: 0.95rem;
+      text-decoration: none; transition: background 0.2s, transform 0.2s;
+      box-shadow: 0 4px 18px rgba(139,26,26,0.45);
+    }
+    .carousel-cta-primary:hover { background: #a31f1f; transform: translateY(-2px); }
+    .carousel-cta-secondary {
+      display: inline-block; padding: 13px 28px;
+      background: rgba(255,255,255,0.15); color: #fff;
+      border: 1.5px solid rgba(255,255,255,0.5);
+      border-radius: 6px; font-weight: 600; font-size: 0.95rem;
+      text-decoration: none; transition: background 0.2s;
+      backdrop-filter: blur(4px);
+    }
+    .carousel-cta-secondary:hover { background: rgba(255,255,255,0.25); }
+    .carousel-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      z-index: 10; background: rgba(255,255,255,0.15);
+      border: 1.5px solid rgba(255,255,255,0.3); color: #fff;
+      width: 44px; height: 44px; border-radius: 50%;
+      font-size: 1.6rem; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: background 0.2s; backdrop-filter: blur(4px);
+      line-height: 1;
+    }
+    .carousel-arrow:hover { background: rgba(255,255,255,0.3); }
+    .carousel-prev { left: 16px; }
+    .carousel-next { right: 16px; }
+    .carousel-dots {
+      position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+      z-index: 10; display: flex; gap: 8px;
+    }
+    .carousel-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,255,255,0.4); cursor: pointer;
+      transition: background 0.2s, transform 0.2s; border: none;
+    }
+    .carousel-dot.active { background: #fff; transform: scale(1.3); }
+    .carousel-price-badge {
+      position: absolute; bottom: 36px; right: 48px;
+      z-index: 2; background: rgba(139,26,26,0.9);
+      color: #fff; padding: 10px 20px; border-radius: 8px;
+      font-size: 1.1rem; font-weight: 700;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      backdrop-filter: blur(4px);
+    }
+    @media(max-width:600px) {
+      .hero-carousel { height: 380px; }
+      .carousel-content { padding: 0 28px; }
+      .carousel-content h1 { font-size: 1.5rem; }
+      .carousel-price-badge { display: none; }
+      .carousel-cta-secondary { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -537,13 +731,27 @@
   </div>
 </header>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-content">
-    <h1>Premium Wholesale Dresses</h1>
-    <p>Authentic Indian fashion at wholesale prices. Bulk orders welcome.</p>
-    <a href="#products" class="hero-cta">Shop Now</a>
+<!-- HERO CAROUSEL -->
+<section class="hero-carousel" id="heroCarousel">
+  <!-- Slides populated by JS after products load -->
+  <div class="carousel-track" id="carouselTrack">
+    <!-- Fallback slide shown before products load -->
+    <div class="carousel-slide active" style="background:linear-gradient(135deg,#8B1A1A 0%,#c0392b 60%,#8B1A1A 100%)">
+      <div class="carousel-overlay"></div>
+      <div class="carousel-content">
+        <span class="carousel-tag">Wholesale Collection</span>
+        <h1>Premium Indian Dresses</h1>
+        <p>Authentic fashion at wholesale prices. Bulk orders welcome.</p>
+        <div class="carousel-btns">
+          <a href="#products" class="carousel-cta-primary">Shop Now</a>
+          <a href="https://wa.me/919760096109" target="_blank" class="carousel-cta-secondary">WhatsApp Order</a>
+        </div>
+      </div>
+    </div>
   </div>
+  <button class="carousel-arrow carousel-prev" onclick="carouselMove(-1)" aria-label="Previous">&#8249;</button>
+  <button class="carousel-arrow carousel-next" onclick="carouselMove(1)" aria-label="Next">&#8250;</button>
+  <div class="carousel-dots" id="carouselDots"></div>
 </section>
 
 <!-- SEARCH & FILTER BAR -->
@@ -560,27 +768,12 @@
       <div class="filter-row">
         <select id="filterCategory" onchange="applyFilters()">
           <option value="">🏷️ All Categories</option>
-          <option value="Poshak">Poshak</option>
-          <option value="Dress">Dress</option>
-          <option value="Set">Set</option>
         </select>
         <select id="filterSize" onchange="applyFilters()">
           <option value="">📏 All Sizes</option>
-          <option value="S">S</option>
-          <option value="M">M</option>
-          <option value="L">L</option>
-          <option value="XL">XL</option>
         </select>
         <select id="filterColor" onchange="applyFilters()">
           <option value="">🎨 All Colors</option>
-          <option value="Blue">Blue</option>
-          <option value="Red">Red</option>
-          <option value="Yellow">Yellow</option>
-          <option value="Green">Green</option>
-          <option value="Pink">Pink</option>
-          <option value="Orange">Orange</option>
-          <option value="Purple">Purple</option>
-          <option value="White">White</option>
         </select>
         <select id="filterStock" onchange="applyFilters()">
           <option value="">📦 All Stock</option>
@@ -852,7 +1045,43 @@
   <div class="footer-bottom">© 2026 Mathura Poshak Bhandaar. All rights reserved.</div>
 </footer>
 
+<!-- PRODUCT DETAIL MODAL -->
+<div id="productOverlay" class="product-overlay" onclick="closeProductModal(event)">
+  <div class="product-modal" id="productModal">
+    <button class="product-modal-close" onclick="closeProduct()">&#10005;</button>
+    <div class="product-modal-body">
+
+      <!-- Left: Image Gallery -->
+      <div class="product-gallery">
+        <div class="gallery-main-wrap">
+          <img id="galleryMainImg" src="" alt="" onerror="this.src='https://via.placeholder.com/500x600?text=No+Image'" />
+        </div>
+        <div class="gallery-thumbs" id="galleryThumbs"></div>
+      </div>
+
+      <!-- Right: Product Info -->
+      <div class="product-detail-info">
+        <span class="detail-category" id="detailCategory"></span>
+        <h2 class="detail-name" id="detailName"></h2>
+        <div class="detail-price" id="detailPrice"></div>
+        <div class="detail-stock-badge" id="detailStock"></div>
+        <p class="detail-description" id="detailDescription"></p>
+        <div class="detail-attrs" id="detailAttrs"></div>
+        <div class="detail-actions">
+          <button class="detail-add-cart-btn" id="detailAddCartBtn" onclick="detailAddToCart()">+ Add to Cart</button>
+          <a class="detail-whatsapp-btn" id="detailWhatsappBtn" href="#" target="_blank">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp Order
+          </a>
+        </div>
+        <button class="detail-share-btn" onclick="copyProductLink()">🔗 Copy Product Link</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <script src="products.js?v=3"></script>
-<script src="app.js?v=13"></script>
+<script src="app.js?v=14"></script>
 </body>
 </html>
