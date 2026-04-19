@@ -2,7 +2,7 @@
    Mathura Poshak Bhandaar – Main App Logic
    ============================================= */
 
-const ORDERS_API_URL = "https://script.google.com/macros/s/AKfycbzqx5HwUsCPWQ1TyhrHvKhpKsLRI4_1KeAjmhkfv7mWxk1Ti3CPQSJtZT1U-Tnbdwyx/exec";
+const ORDERS_API_URL = "https://script.google.com/macros/s/AKfycbwwzRrKZMCmAm2cTWvHExJo9hm4b3kKo7RToM4uiCBCdTGfwLJtBs-F8V9Rh4NK9wOW/exec";
 
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTUoprJDH_LmaXwL1RFDTdlBXxg2tqbHm9SvMTOQtIz9Y6MuAy9zXch3DQzA09QQ0pT2NRyjsoK3isf/pub?gid=0&single=true&output=csv";
 
@@ -29,10 +29,28 @@ function getUserCart(email) { try { return JSON.parse(localStorage.getItem("mpb_
 function saveUserCart(email, c) { localStorage.setItem("mpb_cart_" + email, JSON.stringify(c)); }
 function getUserWishlist(email) { try { return JSON.parse(localStorage.getItem("mpb_wishlist_" + email) || "[]"); } catch(e) { return []; } }
 function saveUserWishlist(email, w) { localStorage.setItem("mpb_wishlist_" + email, JSON.stringify(w)); }
-function getUserOrders(email) { try { return JSON.parse(localStorage.getItem("mpb_orders_" + email) || "[]"); } catch(e) { return []; } }
-function saveUserOrders(email, o) { localStorage.setItem("mpb_orders_" + email, JSON.stringify(o)); }
-function getUserAddresses(email) { try { return JSON.parse(localStorage.getItem("mpb_addr_" + email) || "[]"); } catch(e) { return []; } }
-function saveUserAddresses(email, a) { localStorage.setItem("mpb_addr_" + email, JSON.stringify(a)); }
+// Orders & Addresses — backed by Google Sheets
+async function fetchSheetOrders(email) {
+  try {
+    const r = await fetch(ORDERS_API_URL + "?action=getOrders&email=" + encodeURIComponent(email));
+    const d = await r.json();
+    return d.status === "success" ? d.orders : [];
+  } catch(e) { return []; }
+}
+async function fetchSheetAddresses(email) {
+  try {
+    const r = await fetch(ORDERS_API_URL + "?action=getAddresses&email=" + encodeURIComponent(email));
+    const d = await r.json();
+    return d.status === "success" ? d.addresses : [];
+  } catch(e) { return []; }
+}
+async function apiSaveAddress(email, label, text, isDefault, id) {
+  const payload = { email, label, text, isDefault: !!isDefault, id: id || null };
+  try { await fetch(ORDERS_API_URL + "?action=saveAddress&data=" + encodeURIComponent(JSON.stringify(payload)), { method:"GET", mode:"no-cors" }); } catch(e){}
+}
+async function apiDeleteAddress(id) {
+  try { await fetch(ORDERS_API_URL + "?action=deleteAddress&data=" + encodeURIComponent(JSON.stringify({ id })), { method:"GET", mode:"no-cors" }); } catch(e){}
+}
 
 // =============================================
 // SESSION
@@ -311,9 +329,10 @@ function openOrderHistory() {
 function closeOrderHistory() { document.getElementById("ordersOverlay").classList.remove("open"); }
 function closeOrdersModal(e) { if (e.target === document.getElementById("ordersOverlay")) closeOrderHistory(); }
 
-function renderOrderHistory() {
-  const orders = getUserOrders(currentUser.email);
+async function renderOrderHistory() {
   const container = document.getElementById("ordersContent");
+  container.innerHTML = '<p class="empty-msg">⏳ Loading orders…</p>';
+  const orders = await fetchSheetOrders(currentUser.email);
   if (orders.length === 0) { container.innerHTML = '<p class="empty-msg">📭 No orders yet.<br>Place your first order today!</p>'; return; }
   container.innerHTML = orders.map(o => `
     <div class="order-card">
@@ -340,6 +359,9 @@ function openAccount() {
   document.getElementById("accUserEmail").textContent = currentUser.email;
   document.getElementById("accountOverlay").classList.add("open");
   showAccountSection("profile");
+  // Load profile stats async
+  fetchSheetOrders(currentUser.email).then(o => { const el = document.getElementById("statOrders"); if(el) el.textContent = o.length; });
+  fetchSheetAddresses(currentUser.email).then(a => { const el = document.getElementById("statAddresses"); if(el) el.textContent = a.length; });
 }
 
 function closeAccount() {
@@ -374,9 +396,9 @@ function showAccountSection(section) {
   } else if (section === "wishlist") {
     html += renderAccountWishlistSection();
   } else if (section === "orders") {
-    html += renderAccountOrdersSection();
+    html += `<div id="accOrdersContent"><div class="acc-loading">⏳ Loading orders…</div></div>`;
   } else if (section === "address") {
-    html += renderAddressSection();
+    html += `<div id="accAddrContent"><div class="acc-loading">⏳ Loading addresses…</div></div>`;
   } else if (section === "resetpwd") {
     html += renderChangePwdSection();
   } else if (section === "help") {
@@ -385,6 +407,92 @@ function showAccountSection(section) {
 
   html += "</div>";
   content.innerHTML = html;
+
+  // Async load for orders and addresses
+  if (section === "orders")  loadAccountOrders();
+  if (section === "address") loadAccountAddresses();
+}
+
+async function loadAccountOrders() {
+  const el = document.getElementById("accOrdersContent");
+  if (!el || !currentUser) return;
+  const orders = await fetchSheetOrders(currentUser.email);
+  if (!orders.length) {
+    el.innerHTML = `<div class="acc-empty-state">📭<p>No orders yet</p><span>Your order history will appear here after your first purchase</span></div>`;
+    return;
+  }
+  el.innerHTML = orders.map(o => `
+    <div class="acc-order-card">
+      <div class="acc-order-header">
+        <span class="acc-order-id">${o.orderId}</span>
+        <span class="acc-order-status ${(o.status||'').toLowerCase()}">${o.status || "Pending"}</span>
+      </div>
+      <div class="acc-order-meta">${o.date || ""}</div>
+      <div class="acc-order-products">${o.products || ""}</div>
+      ${o.address ? `<div class="acc-order-addr">📍 ${o.address}</div>` : ""}
+      <div class="acc-order-total">Total: ₹${o.total || 0}</div>
+      ${o.remarks ? `<div class="acc-order-remarks">Note: ${o.remarks}</div>` : ""}
+    </div>`).join("");
+}
+
+async function loadAccountAddresses() {
+  const el = document.getElementById("accAddrContent");
+  if (!el || !currentUser) return;
+  const addresses = await fetchSheetAddresses(currentUser.email);
+  let html = "";
+  if (!addresses.length) {
+    html += `<div class="acc-empty-state">📍<p>No saved addresses</p><span>Save addresses for faster checkout</span></div>`;
+  } else {
+    html += addresses.map(a => `
+      <div class="acc-addr-card ${a.isDefault ? 'acc-addr-default' : ''}">
+        <div class="acc-addr-top">
+          <span class="acc-addr-label">${a.label || "Address"}</span>
+          ${a.isDefault ? `<span class="acc-addr-badge">✔ Default</span>` : `<button class="acc-addr-setdef" onclick="setDefaultAddr('${a.id}')">Set as Default</button>`}
+        </div>
+        <div class="acc-addr-text">${a.text}</div>
+        <button class="acc-addr-del" onclick="deleteAddr('${a.id}')">🗑 Remove</button>
+      </div>`).join("");
+  }
+  html += `
+    <div class="acc-add-addr-form">
+      <h3>Add New Address</h3>
+      <div class="form-group"><label>Label (e.g. Home, Shop)</label><input type="text" id="newAddrLabel" placeholder="Home" /></div>
+      <div class="form-group"><label>Full Address *</label><textarea id="newAddrText" rows="3" placeholder="Street, City, State, PIN code"></textarea></div>
+      <label style="font-size:.85rem;display:flex;align-items:center;gap:8px;margin-bottom:12px"><input type="checkbox" id="newAddrDefault"> Make this my default address</label>
+      <button class="acc-save-btn" onclick="addAddr()">+ Add Address</button>
+    </div>`;
+  el.innerHTML = html;
+}
+
+async function addAddr() {
+  const label = (document.getElementById("newAddrLabel").value || "Address").trim();
+  const text  = (document.getElementById("newAddrText").value || "").trim();
+  const isDef = document.getElementById("newAddrDefault").checked;
+  if (!text) { showToast("Please enter an address"); return; }
+  showToast("Saving address…");
+  const id = "addr_" + Date.now();
+  await apiSaveAddress(currentUser.email, label, text, isDef, id);
+  showToast("✅ Address saved!");
+  showAccountSection("address");
+}
+
+async function deleteAddr(id) {
+  if (!confirm("Remove this address?")) return;
+  showToast("Removing…");
+  await apiDeleteAddress(id);
+  showToast("Address removed");
+  showAccountSection("address");
+}
+
+async function setDefaultAddr(id) {
+  showToast("Updating default…");
+  // Fetch current address details, then re-save with isDefault = true
+  const addresses = await fetchSheetAddresses(currentUser.email);
+  const addr = addresses.find(a => a.id === id);
+  if (!addr) return;
+  await apiSaveAddress(currentUser.email, addr.label, addr.text, true, id);
+  showToast("✅ Default address updated!");
+  showAccountSection("address");
 }
 
 function renderProfileSection() {
@@ -418,7 +526,7 @@ function renderProfileSection() {
     </div>
     <div class="profile-stats">
       <div class="stat-card">
-        <div class="stat-num">${getUserOrders(u.email).length}</div>
+        <div class="stat-num" id="statOrders">—</div>
         <div class="stat-label">Orders</div>
       </div>
       <div class="stat-card">
@@ -426,7 +534,7 @@ function renderProfileSection() {
         <div class="stat-label">Wishlist</div>
       </div>
       <div class="stat-card">
-        <div class="stat-num">${getUserAddresses(u.email).length}</div>
+        <div class="stat-num" id="statAddresses">—</div>
         <div class="stat-label">Addresses</div>
       </div>
     </div>`;
@@ -476,70 +584,7 @@ function renderAccountWishlistSection() {
     </div>`).join("")}</div>`;
 }
 
-function renderAccountOrdersSection() {
-  const orders = getUserOrders(currentUser.email);
-  if (orders.length === 0) return `<div class="acc-empty-state">📭<p>No orders yet</p><span>Your order history will appear here after your first purchase</span></div>`;
-  return orders.map(o => `
-    <div class="acc-order-card">
-      <div class="acc-order-head">
-        <div>
-          <strong>${o.orderId}</strong>
-          <span class="acc-order-date">${o.date}</span>
-        </div>
-        <div class="acc-order-total">₹${o.total}</div>
-      </div>
-      <div class="acc-order-items">${(o.items||[]).map(i=>`<span class="acc-order-tag">${i.name} ×${i.qty}</span>`).join("")}</div>
-      ${o.address ? `<div class="acc-order-addr">📍 ${o.address}</div>` : ""}
-      <div class="acc-order-status">✅ Order Placed</div>
-    </div>`).join("");
-}
-
-function renderAddressSection() {
-  const addresses = getUserAddresses(currentUser.email);
-  const list = addresses.length === 0
-    ? `<div class="acc-empty-state">📍<p>No saved addresses</p><span>Save addresses for faster checkout</span></div>`
-    : addresses.map((a, i) => `
-        <div class="acc-addr-card">
-          <div class="acc-addr-label">${a.label || "Address " + (i+1)}</div>
-          <div class="acc-addr-text">${a.text}</div>
-          <div class="acc-addr-actions">
-            <button class="acc-addr-del" onclick="deleteAddress(${i})">🗑 Remove</button>
-          </div>
-        </div>`).join("");
-
-  return `${list}
-    <div class="acc-add-addr-form">
-      <h3>Add New Address</h3>
-      <div class="profile-field">
-        <label>Label (Home / Office / Other)</label>
-        <input type="text" id="newAddrLabel" placeholder="e.g. Home" maxlength="20" />
-      </div>
-      <div class="profile-field">
-        <label>Full Address *</label>
-        <textarea id="newAddrText" placeholder="House/Flat, Street, City, State – PIN Code" rows="3"></textarea>
-      </div>
-      <button class="acc-save-btn" onclick="addAddress()">+ Add Address</button>
-    </div>`;
-}
-
-function addAddress() {
-  const label = (document.getElementById("newAddrLabel").value || "").trim();
-  const text  = (document.getElementById("newAddrText").value  || "").trim();
-  if (!text) { showToast("Please enter an address"); return; }
-  const addresses = getUserAddresses(currentUser.email);
-  addresses.push({ label: label || "Address", text });
-  saveUserAddresses(currentUser.email, addresses);
-  showToast("✅ Address saved!");
-  showAccountSection("address");
-}
-
-function deleteAddress(idx) {
-  const addresses = getUserAddresses(currentUser.email);
-  addresses.splice(idx, 1);
-  saveUserAddresses(currentUser.email, addresses);
-  showToast("Address removed");
-  showAccountSection("address");
-}
+// renderAccountOrdersSection and renderAddressSection replaced by async loadAccountOrders / loadAccountAddresses above
 
 function renderChangePwdSection() {
   return `
@@ -799,8 +844,64 @@ function openCheckout() {
     document.getElementById("custName").value  = currentUser.firstName + " " + currentUser.lastName;
     document.getElementById("custPhone").value = currentUser.phone;
     document.getElementById("custEmail").value = currentUser.email;
+    // Load saved addresses into selector
+    loadCheckoutAddresses();
   }
   document.getElementById("modalOverlay").classList.add("open");
+}
+
+async function loadCheckoutAddresses() {
+  const addrGroup = document.getElementById("checkoutAddrGroup");
+  if (!addrGroup || !currentUser) return;
+  const addresses = await fetchSheetAddresses(currentUser.email);
+  if (!addresses.length) {
+    // No saved addresses — show plain textarea
+    addrGroup.innerHTML = `<label>Delivery Address *</label><textarea id="custAddress" placeholder="Full address with PIN code" required rows="3"></textarea>`;
+    return;
+  }
+  const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
+  const opts = addresses.map(a =>
+    `<option value="${encodeURIComponent(a.text)}" ${a.id === defaultAddr.id ? "selected" : ""}>${a.label}: ${a.text.substring(0,50)}${a.text.length>50?"…":""}</option>`
+  ).join("") + `<option value="__new__">✏️ Enter a different address…</option>`;
+  addrGroup.innerHTML = `
+    <label>Delivery Address *</label>
+    <select id="addrDropdown" onchange="onCheckoutAddrChange(this.value)" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;margin-bottom:8px;font-size:0.95rem">${opts}</select>
+    <textarea id="custAddress" style="display:none" placeholder="Full address with PIN code" rows="3"></textarea>
+    <div id="checkoutSaveAddrBox" style="display:none;margin-top:8px;padding:10px;background:#fdf5f5;border-radius:6px;border:1px solid #f0c0c0">
+      <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer">
+        <input type="checkbox" id="checkoutSaveAddr"> Save this address to my account
+      </label>
+      <div id="checkoutSaveAddrOptions" style="display:none;margin-top:8px">
+        <input type="text" id="checkoutAddrLabel" placeholder="Label (e.g. Home, Shop)" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;margin-bottom:6px;font-size:0.85rem"/>
+        <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer">
+          <input type="checkbox" id="checkoutMakeDef"> Make this my default address
+        </label>
+      </div>
+    </div>`;
+  // Set hidden textarea value to default address
+  document.getElementById("custAddress").value = defaultAddr.text;
+  // Wire save checkbox toggle
+  document.getElementById("checkoutSaveAddr") && document.getElementById("checkoutSaveAddr").addEventListener("change", function() {
+    document.getElementById("checkoutSaveAddrOptions").style.display = this.checked ? "block" : "none";
+  });
+  // Set initial textarea value for form submission
+  onCheckoutAddrChange(encodeURIComponent(defaultAddr.text));
+}
+
+function onCheckoutAddrChange(val) {
+  const textarea = document.getElementById("custAddress");
+  const saveBox  = document.getElementById("checkoutSaveAddrBox");
+  if (val === "__new__") {
+    textarea.style.display = "block";
+    textarea.required = true;
+    textarea.value = "";
+    if (saveBox && currentUser) saveBox.style.display = "block";
+  } else {
+    textarea.style.display = "none";
+    textarea.required = false;
+    textarea.value = decodeURIComponent(val);
+    if (saveBox) saveBox.style.display = "none";
+  }
 }
 
 function closeCheckout() { document.getElementById("modalOverlay").classList.remove("open"); }
@@ -833,10 +934,17 @@ async function submitOrder(e) {
 
   try {
     await fetch(ORDERS_API_URL + "?action=order&data=" + encodeURIComponent(JSON.stringify(orderData)), { method: "GET", mode: "no-cors" });
+    // Order is now saved in Google Sheets — no localStorage needed
+    // Check if user wants to save a new address entered at checkout
     if (currentUser) {
-      const orders = getUserOrders(currentUser.email);
-      orders.unshift({ ...orderData, date: new Date().toLocaleDateString("en-IN"), items: [...items] });
-      saveUserOrders(currentUser.email, orders);
+      const saveCheck = document.getElementById("checkoutSaveAddr");
+      if (saveCheck && saveCheck.checked) {
+        const addrText = orderData.address;
+        const addrLabel = (document.getElementById("checkoutAddrLabel").value || "Address").trim();
+        const makeDef   = document.getElementById("checkoutMakeDef") && document.getElementById("checkoutMakeDef").checked;
+        const newId = "addr_" + Date.now();
+        await apiSaveAddress(currentUser.email, addrLabel, addrText, makeDef, newId);
+      }
     }
     const summaryHtml = `<div class="ty-customer"><b>${orderData.name}</b> &nbsp;|&nbsp; ${orderData.phone}</div>` +
       (orderData.address ? `<div class="ty-address">&#128205; ${orderData.address}</div>` : "") +
