@@ -896,15 +896,11 @@ function buildCarousel(products) {
          style="background-image:url('${p.image}');background-size:cover;background-position:center">
       <div class="carousel-overlay"></div>
       <div class="carousel-content">
-        <span class="carousel-tag">${p.category || "Collection"}</span>
-        <h1>${p.name}</h1>
-        <p>${(p.colors||[]).join(", ")} &nbsp;·&nbsp; ${(p.sizes||[]).join(", ")}</p>
         <div class="carousel-btns">
           <a href="#products" class="carousel-cta-primary" onclick="carouselShopNow(${p.id})">Shop Now</a>
           <a href="https://wa.me/919760096109?text=Hi%2C%20I%27m%20interested%20in%20${encodeURIComponent(p.name)}" target="_blank" class="carousel-cta-secondary">WhatsApp Order</a>
         </div>
       </div>
-      <div class="carousel-price-badge">₹${p.price}</div>
     </div>`).join("");
 
   dotsEl.innerHTML = slides.map((_, i) =>
